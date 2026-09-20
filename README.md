@@ -41,8 +41,8 @@ Windows x86_64, and both Mac architectures. Push a tag matching the committed
 Cargo version to build, test, and publish a release automatically:
 
 ```sh
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.1.1
+git push origin v0.1.1
 ```
 
 Downloads include examples, source with dependencies, and checksums. Binaries are

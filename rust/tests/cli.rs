@@ -2,24 +2,16 @@
 
 use serde_json::Value;
 use std::fs;
-use std::path::PathBuf;
 use std::process::{Command, Output};
-use std::time::{SystemTime, UNIX_EPOCH};
 
 struct Sandbox {
-    directory: PathBuf,
+    directory: tempfile::TempDir,
 }
 
 impl Sandbox {
     /// Create an isolated temporary directory for one test.
     fn new() -> Self {
-        let stamp = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_nanos();
-        let directory =
-            std::env::temp_dir().join(format!("painter-test-{}-{stamp}", std::process::id()));
-        fs::create_dir(&directory).unwrap();
+        let directory = tempfile::tempdir().unwrap();
         Self {
             directory,
         }
@@ -46,13 +38,6 @@ impl Sandbox {
     }
 }
 
-impl Drop for Sandbox {
-    /// Remove temporary files when the test releases its sandbox.
-    fn drop(&mut self) {
-        let _ = fs::remove_dir_all(&self.directory);
-    }
-}
-
 /// Verify edits persist between processes and appear at the right row and column.
 #[test]
 fn commands_share_pixels_and_print_correct_rows() {
@@ -75,7 +60,8 @@ fn commands_share_pixels_and_print_correct_rows() {
     ]);
 
     let saved: Value =
-        serde_json::from_slice(&fs::read(sandbox.directory.join("art.json")).unwrap()).unwrap();
+        serde_json::from_slice(&fs::read(sandbox.directory.path().join("art.json")).unwrap())
+            .unwrap();
     let pixels = saved["pixels"].as_array().unwrap();
     assert_eq!(pixels.len(), 6);
     assert!(pixels[..5].iter().all(|pixel| pixel["a"] == 0));
@@ -100,7 +86,7 @@ fn commands_share_pixels_and_print_correct_rows() {
 fn bad_edits_and_recreation_preserve_saved_canvas() {
     let sandbox = Sandbox::new();
     sandbox.success(&["new", "--width", "2", "--height", "2"]);
-    let path = sandbox.directory.join("canvas.json");
+    let path = sandbox.directory.path().join("canvas.json");
     let original = fs::read(&path).unwrap();
 
     for args in [
@@ -175,7 +161,7 @@ fn help_and_validation_work_without_panics() {
         assert!(!output.status.success());
         assert!(!String::from_utf8_lossy(&output.stderr).contains("panicked"));
     }
-    let path = sandbox.directory.join("canvas.json");
+    let path = sandbox.directory.path().join("canvas.json");
     assert!(!path.exists());
     for bad_canvas in [
         "not json",
@@ -191,7 +177,7 @@ fn help_and_validation_work_without_panics() {
 #[test]
 fn export_preserves_rgba_and_source_canvas() {
     let sandbox = Sandbox::new();
-    let source = sandbox.directory.join("canvas.json");
+    let source = sandbox.directory.path().join("canvas.json");
     let canvas = r#"{
         "width": 3,
         "height": 2,
@@ -207,7 +193,7 @@ fn export_preserves_rgba_and_source_canvas() {
     fs::write(&source, canvas).unwrap();
     sandbox.success(&["export", "--output", "my art.png"]);
 
-    let file = fs::File::open(sandbox.directory.join("my art.png")).unwrap();
+    let file = fs::File::open(sandbox.directory.path().join("my art.png")).unwrap();
     let mut reader = png::Decoder::new(std::io::BufReader::new(file))
         .read_info()
         .unwrap();
@@ -233,7 +219,7 @@ fn export_refuses_existing_destinations() {
     sandbox.success(&["new", "--width", "1", "--height", "1"]);
     sandbox.success(&["export", "-o", "art.png"]);
     for destination in ["art.png", "canvas.json"] {
-        let path = sandbox.directory.join(destination);
+        let path = sandbox.directory.path().join(destination);
         let original = fs::read(&path).unwrap();
         assert!(
             !sandbox
@@ -257,7 +243,7 @@ fn failed_export_leaves_no_output() {
             .success()
     );
     fs::write(
-        sandbox.directory.join("canvas.json"),
+        sandbox.directory.path().join("canvas.json"),
         r#"{"width":1,"height":1,"pixels":[]}"#,
     )
     .unwrap();
@@ -267,7 +253,7 @@ fn failed_export_leaves_no_output() {
             .status
             .success()
     );
-    assert!(!sandbox.directory.join("art.png").exists());
+    assert!(!sandbox.directory.path().join("art.png").exists());
     sandbox.success(&[
         "--file",
         "valid.json",
@@ -302,7 +288,7 @@ fn failed_export_leaves_no_output() {
 #[test]
 fn view_renders_rgba_without_changing_the_canvas() {
     let sandbox = Sandbox::new();
-    let path = sandbox.directory.join("canvas.json");
+    let path = sandbox.directory.path().join("canvas.json");
     let canvas = r#"{
         "width": 2,
         "height": 2,

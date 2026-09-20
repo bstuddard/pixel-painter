@@ -1,6 +1,6 @@
 [package]
 name = "painter"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "A CLI pixel painter with persistent RGBA canvases and terminal previews"
 license = "GPL-3.0-only"
