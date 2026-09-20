@@ -1,0 +1,3 @@
+# Keep struct fields and enum patterns on separate lines.
+struct_lit_width = 0
+struct_variant_width = 0

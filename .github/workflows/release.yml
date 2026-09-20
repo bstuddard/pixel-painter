@@ -1,0 +1,169 @@
+name: Build releases
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-22.04
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Read version and validate tag
+        id: version
+        shell: bash
+        run: |
+          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' rust/Cargo.toml)
+          test -n "$version"
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            test "$GITHUB_REF_NAME" = "v$version"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+      # Include dependency sources so the matching source can be rebuilt offline.
+      - name: Package source
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          name="painter-$VERSION-source"
+          mkdir -p "dist/$name"
+          git archive HEAD | tar -x -C "dist/$name"
+          cd "dist/$name/rust"
+          mkdir -p .cargo
+          cargo +stable vendor --locked vendor > .cargo/config.toml
+          cd ../../..
+          tar -czf "dist/$name.tar.gz" -C dist "$name"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package-source
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  build:
+    needs: prepare
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            platform: linux-x86_64
+            binary: painter
+            rustflags: ''
+          - os: windows-2022
+            target: x86_64-pc-windows-msvc
+            platform: windows-x86_64
+            binary: painter.exe
+            rustflags: '-C target-feature=+crt-static'
+          - os: macos-15
+            target: aarch64-apple-darwin
+            platform: macos-aarch64
+            binary: painter
+            rustflags: ''
+          - os: macos-15-intel
+            target: x86_64-apple-darwin
+            platform: macos-x86_64
+            binary: painter
+            rustflags: ''
+    runs-on: ${{ matrix.os }}
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+      PLATFORM: ${{ matrix.platform }}
+      TARGET: ${{ matrix.target }}
+      BINARY: ${{ matrix.binary }}
+      RUSTFLAGS: ${{ matrix.rustflags }}
+      MACOSX_DEPLOYMENT_TARGET: '13.0'
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal --target "$TARGET"
+      - name: Test and build
+        working-directory: rust
+        run: |
+          cargo +stable test --locked --target "$TARGET"
+          cargo +stable build --release --locked --target "$TARGET"
+      - name: Prepare download
+        run: |
+          name="painter-$VERSION-$PLATFORM"
+          mkdir -p "dist/$name"
+          cp "rust/target/$TARGET/release/$BINARY" "dist/$name/"
+          cp LICENSE README.md "dist/$name/"
+          cp -R rust/examples "dist/$name/examples"
+          cat > "dist/$name/RUNNING.txt" <<'EOF'
+          Open a terminal in this folder. Rust is not required.
+          Linux/macOS: ./painter --help
+          Windows PowerShell: .\painter.exe --help
+          Preview: ./painter --file examples/soccer-ball.json view
+          Use .\painter.exe instead of ./painter on Windows.
+          Binaries are not publisher-signed or notarized.
+          See LICENSE; matching application and dependency sources are in
+          painter-VERSION-source.tar.gz alongside this download.
+          Rebuild sources from rust/: cargo build --release --locked --offline
+          EOF
+          "dist/$name/$BINARY" --help
+      - name: Archive Linux and macOS
+        if: runner.os != 'Windows'
+        run: |
+          name="painter-$VERSION-$PLATFORM"
+          tar -czf "dist/$name.tar.gz" -C dist "$name"
+      - name: Archive Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $name = "painter-$env:VERSION-$env:PLATFORM"
+          Compress-Archive -Path "dist/$name" -DestinationPath "dist/$name.zip"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: package-${{ matrix.platform }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+          if-no-files-found: error
+
+  release:
+    needs: [prepare, build]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: package-*
+          path: dist
+          merge-multiple: true
+      - name: Generate checksums
+        working-directory: dist
+        run: sha256sum ./*.tar.gz ./*.zip > SHA256SUMS
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-downloads
+          path: dist/*
+          if-no-files-found: error
+      # Manual runs only save artifacts; tag pushes also create a draft release.
+      - name: Create draft release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          gh release create "$TAG" dist/* --verify-tag --draft \
+            --title "$TAG" --notes 'Download the archive for your OS and extract it. Run painter --help from a terminal. Rust is not required. Matching source and SHA256 checksums are included. Builds are unsigned and not notarized.'

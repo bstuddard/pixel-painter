@@ -1,0 +1,27 @@
+# Rust build and profiling output
+target/
+/dist/
+/releases/
+*.profraw
+*.profdata
+
+# Local canvas (the named sample artworks remain versioned)
+/canvas.json
+/rust/canvas.json
+
+# Local game-art experiments
+/local-assets/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+/.agents/
+/.codex/
+/docs/release-review.md
+
+# Editor and OS artifacts
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
