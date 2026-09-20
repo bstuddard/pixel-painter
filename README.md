@@ -38,7 +38,7 @@ Once published, GitHub Releases will offer Linux, Windows, and Mac executables
 
 The [release workflow](.github/workflows/release.yml) tests and builds Linux x86_64,
 Windows x86_64, and both Mac architectures. Push a tag matching the committed
-Cargo version to create a draft release, then review and publish it on GitHub:
+Cargo version to build, test, and publish a release automatically:
 
 ```sh
 git tag v0.1.0
@@ -46,8 +46,8 @@ git push origin v0.1.0
 ```
 
 Downloads include examples, source with dependencies, and checksums. Binaries are
-unsigned. Use **Actions → Build releases → Run workflow** for a trial build.
-The first hosted run is still pending.
+unsigned. Use **Actions → Build releases → Run workflow** with the tag field empty
+for a trial build, or enter an existing tag to build and publish that version.
 
 **Testing:** The Linux release build passes all nine tests and a soccer-ball
 preview/export check. Earlier local Windows and Mac builds were cross-compiled

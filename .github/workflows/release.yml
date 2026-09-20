@@ -4,12 +4,17 @@ on:
   push:
     tags: ['v*']
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing tag to publish (leave blank for a trial build)'
+        required: false
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ inputs.tag || github.ref_name }}
   cancel-in-progress: false
 
 jobs:
@@ -17,20 +22,28 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       version: ${{ steps.version.outputs.version }}
+      tag: ${{ steps.version.outputs.tag }}
+      commit: ${{ steps.version.outputs.commit }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+          ref: ${{ inputs.tag || github.ref }}
       - name: Read version and validate tag
         id: version
         shell: bash
+        env:
+          RELEASE_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
         run: |
           version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' rust/Cargo.toml)
           test -n "$version"
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
-            test "$GITHUB_REF_NAME" = "v$version"
+          if [[ -n "$RELEASE_TAG" ]]; then
+            test "$RELEASE_TAG" = "v$version"
+            test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Install Rust
         run: rustup toolchain install stable --profile minimal
       # Include dependency sources so the matching source can be rebuilt offline.
@@ -93,12 +106,13 @@ jobs:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
+          ref: ${{ needs.prepare.outputs.commit }}
       - name: Install Rust
         run: rustup toolchain install stable --profile minimal --target "$TARGET"
       - name: Test and build
         working-directory: rust
         run: |
-          cargo +stable test --locked --target "$TARGET"
+          cargo +stable test --release --locked --target "$TARGET"
           cargo +stable build --release --locked --target "$TARGET"
       - name: Prepare download
         run: |
@@ -119,6 +133,8 @@ jobs:
           Rebuild sources from rust/: cargo build --release --locked --offline
           EOF
           "dist/$name/$BINARY" --help
+          "dist/$name/$BINARY" --file "dist/$name/examples/soccer-ball.json" view > /dev/null
+          "dist/$name/$BINARY" --file "dist/$name/examples/soccer-ball.json" export --output dist/smoke.png
       - name: Archive Linux and macOS
         if: runner.os != 'Windows'
         run: |
@@ -157,13 +173,29 @@ jobs:
           name: release-downloads
           path: dist/*
           if-no-files-found: error
-      # Manual runs only save artifacts; tag pushes also create a draft release.
-      - name: Create draft release
-        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/')
+      # Publish only after every platform succeeds; manual trial builds keep artifacts only.
+      - name: Publish release
+        if: needs.prepare.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          TAG: ${{ github.ref_name }}
+          TAG: ${{ needs.prepare.outputs.tag }}
         run: |
-          gh release create "$TAG" dist/* --verify-tag --draft \
-            --title "$TAG" --notes 'Download the archive for your OS and extract it. Run painter --help from a terminal. Rust is not required. Matching source and SHA256 checksums are included. Builds are unsigned and not notarized.'
+          cat > /tmp/release-notes.md <<'EOF'
+          Pixel Painter creates editable RGBA canvases, previews pixel art in a terminal, and exports PNGs.
+
+          Download the archive for Linux x86_64, Windows x86_64, Apple Silicon Mac, or Intel Mac. Extract it and run `./painter --help` (Windows PowerShell: `.\painter.exe --help`). Rust is not required.
+
+          All four platforms passed native release-mode tests plus CLI help, soccer-ball preview, and PNG-export checks. Hands-on testing on Windows and Mac devices is still welcome. Builds are unsigned and not notarized.
+
+          Examples, matching source with dependencies, and SHA256 checksums are included. Licensed GPL-3.0-only.
+          EOF
+          if gh release view "$TAG" --json isDraft --jq .isDraft > /tmp/release-is-draft; then
+            # Resume an existing draft, but never replace an already-published release.
+            test "$(cat /tmp/release-is-draft)" = true
+            gh release upload "$TAG" dist/* --clobber
+            gh release edit "$TAG" --notes-file /tmp/release-notes.md --draft=false
+          else
+            gh release create "$TAG" dist/* --verify-tag \
+              --title "$TAG" --notes-file /tmp/release-notes.md
+          fi
