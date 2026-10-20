@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "ellipse",
+      "x": 10,
+      "y": 40,
+      "width": 29,
+      "height": 5,
+      "color": "#17213965",
+      "fill": true
+    }
+  ]
+}

@@ -1,0 +1,160 @@
+{
+  "version": 1,
+  "image": "sheet.png",
+  "preview": "preview.png",
+  "animation": "animation.png",
+  "width": 202,
+  "height": 102,
+  "frames": [
+    {
+      "name": "frame-0",
+      "file": "frames/0000.png",
+      "rect": {
+        "x": 2,
+        "y": 2,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "south-1",
+      "file": "frames/0001.png",
+      "rect": {
+        "x": 52,
+        "y": 2,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "east-0",
+      "file": "frames/0002.png",
+      "rect": {
+        "x": 102,
+        "y": 2,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "east-1",
+      "file": "frames/0003.png",
+      "rect": {
+        "x": 152,
+        "y": 2,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "north-0",
+      "file": "frames/0004.png",
+      "rect": {
+        "x": 2,
+        "y": 52,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "north-1",
+      "file": "frames/0005.png",
+      "rect": {
+        "x": 52,
+        "y": 52,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "west-0",
+      "file": "frames/0006.png",
+      "rect": {
+        "x": 102,
+        "y": 52,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    },
+    {
+      "name": "west-1",
+      "file": "frames/0007.png",
+      "rect": {
+        "x": 152,
+        "y": 52,
+        "width": 48,
+        "height": 48
+      },
+      "duration_ms": 180,
+      "pivot": {
+        "x": 24,
+        "y": 43
+      }
+    }
+  ],
+  "tags": {
+    "walk-east": {
+      "frames": [
+        2,
+        3
+      ],
+      "direction": "east"
+    },
+    "walk-north": {
+      "frames": [
+        4,
+        5
+      ],
+      "direction": "north"
+    },
+    "walk-south": {
+      "frames": [
+        0,
+        1
+      ],
+      "direction": "south"
+    },
+    "walk-west": {
+      "frames": [
+        6,
+        7
+      ],
+      "direction": "west"
+    }
+  }
+}

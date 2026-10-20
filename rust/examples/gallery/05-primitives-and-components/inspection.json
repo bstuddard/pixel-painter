@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "width": 48,
+  "height": 32,
+  "pixels": 1536,
+  "transparent_pixels": 1104,
+  "partial_alpha_pixels": 0,
+  "opaque_pixels": 432,
+  "transparency_coverage": 0.71875,
+  "occupied_bounds": {
+    "x": 0,
+    "y": 1,
+    "width": 46,
+    "height": 29
+  },
+  "unique_colors": 7,
+  "colors": {
+    "#00000000": 1104,
+    "#536287FF": 130,
+    "#7196B9FF": 144,
+    "#9C8D7EFF": 30,
+    "#BEAED4FF": 16,
+    "#D18A88FF": 94,
+    "#E5B875FF": 18
+  },
+  "palette_usage": {},
+  "off_palette_pixels": 0,
+  "warnings": []
+}

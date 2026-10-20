@@ -1,0 +1,102 @@
+{
+  "seams": [
+    {
+      "edge": "right",
+      "from": 0,
+      "mismatched_pixels": 0,
+      "to": 1
+    },
+    {
+      "edge": "down",
+      "from": 0,
+      "mismatched_pixels": 0,
+      "to": 1
+    },
+    {
+      "edge": "right",
+      "from": 1,
+      "mismatched_pixels": 0,
+      "to": 2
+    },
+    {
+      "edge": "down",
+      "from": 1,
+      "mismatched_pixels": 0,
+      "to": 2
+    },
+    {
+      "edge": "right",
+      "from": 2,
+      "mismatched_pixels": 0,
+      "to": 3
+    },
+    {
+      "edge": "down",
+      "from": 2,
+      "mismatched_pixels": 0,
+      "to": 3
+    },
+    {
+      "edge": "right",
+      "from": 3,
+      "mismatched_pixels": 0,
+      "to": 4
+    },
+    {
+      "edge": "down",
+      "from": 3,
+      "mismatched_pixels": 0,
+      "to": 4
+    },
+    {
+      "edge": "right",
+      "from": 4,
+      "mismatched_pixels": 0,
+      "to": 5
+    },
+    {
+      "edge": "down",
+      "from": 4,
+      "mismatched_pixels": 0,
+      "to": 5
+    },
+    {
+      "edge": "right",
+      "from": 5,
+      "mismatched_pixels": 0,
+      "to": 6
+    },
+    {
+      "edge": "down",
+      "from": 5,
+      "mismatched_pixels": 0,
+      "to": 6
+    },
+    {
+      "edge": "right",
+      "from": 6,
+      "mismatched_pixels": 0,
+      "to": 7
+    },
+    {
+      "edge": "down",
+      "from": 6,
+      "mismatched_pixels": 0,
+      "to": 7
+    },
+    {
+      "edge": "right",
+      "from": 7,
+      "mismatched_pixels": 0,
+      "to": 0
+    },
+    {
+      "edge": "down",
+      "from": 7,
+      "mismatched_pixels": 0,
+      "to": 0
+    }
+  ],
+  "valid": true,
+  "version": 1
+}

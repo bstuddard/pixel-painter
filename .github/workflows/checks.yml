@@ -1,0 +1,135 @@
+name: Check pixel painter
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  workflow_call:
+    inputs:
+      revision:
+        description: Exact candidate commit to validate
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.revision || github.sha }}
+      - name: Install audit tool
+        run: |
+          rustup toolchain install stable --profile minimal
+          cargo +stable install cargo-audit --version 0.22.2 --locked
+      - name: Audit core (deny vulnerabilities and informational warnings)
+        run: cargo +stable audit --file rust/Cargo.lock --deny warnings
+      # The standalone demo has documented, unpatched informational notices.
+      # Print them without suppressions; newly reported vulnerabilities still fail.
+      - name: Audit consumer (report informational notices)
+        run: cargo +stable audit --file integrations/macroquad/Cargo.lock --no-fetch
+
+  minimum-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.revision || github.sha }}
+      - name: Install minimum Rust
+        run: rustup toolchain install 1.88.0 --profile minimal
+      - name: Test core on declared minimum Rust
+        run: cargo +1.88.0 test --manifest-path rust/Cargo.toml --locked
+      - name: Test library without CLI on declared minimum Rust
+        run: cargo +1.88.0 test --manifest-path rust/Cargo.toml --no-default-features --locked
+      - name: Test consumer on declared minimum Rust
+        run: cargo +1.88.0 test --manifest-path integrations/macroquad/Cargo.toml --locked
+
+  rust:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.revision || github.sha }}
+      - name: Install Rust checks
+        run: rustup toolchain install stable --profile minimal --component rustfmt --component clippy
+      - name: Formatting
+        run: cargo +stable fmt --manifest-path rust/Cargo.toml --all -- --check
+      - name: Clippy
+        run: cargo +stable clippy --manifest-path rust/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Library Clippy without CLI
+        run: cargo +stable clippy --manifest-path rust/Cargo.toml --no-default-features --all-targets --locked -- -D warnings
+      - name: Debug tests
+        run: cargo +stable test --manifest-path rust/Cargo.toml --locked
+      - name: Library tests without CLI
+        run: cargo +stable test --manifest-path rust/Cargo.toml --no-default-features --locked
+      - name: Release tests
+        run: cargo +stable test --manifest-path rust/Cargo.toml --release --locked
+      - name: Documentation
+        run: cargo +stable doc --manifest-path rust/Cargo.toml --no-deps --locked
+        env:
+          RUSTDOCFLAGS: -D warnings
+      - name: Consumer formatting
+        run: cargo +stable fmt --manifest-path integrations/macroquad/Cargo.toml -- --check
+      - name: Consumer Clippy
+        run: cargo +stable clippy --manifest-path integrations/macroquad/Cargo.toml --all-targets --locked -- -D warnings
+      - name: Consumer tests (no display required)
+        run: cargo +stable test --manifest-path integrations/macroquad/Cargo.toml --locked
+      - name: Install virtual display for consumer smoke test
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends -y xvfb xauth libgl1-mesa-dri
+      - name: Draw exported character in Macroquad
+        if: runner.os == 'Linux'
+        run: xvfb-run -a cargo +stable run --manifest-path integrations/macroquad/Cargo.toml --locked -- --smoke-test
+
+  gallery:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.revision || github.sha }}
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Build CLI
+        run: cargo +stable build --manifest-path rust/Cargo.toml --release --locked
+      - name: Reproduce checked-in gallery
+        run: |
+          python3 rust/examples/generate_gallery.py --painter rust/target/release/painter --output "$RUNNER_TEMP/gallery"
+          diff rust/examples/gallery/SHA256SUMS "$RUNNER_TEMP/gallery/SHA256SUMS"
+      - name: Verify checked-in artifact hashes
+        working-directory: rust/examples/gallery
+        run: sha256sum --check SHA256SUMS
+
+  packaging:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ inputs.revision || github.sha }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Install Rust
+        run: rustup toolchain install stable --profile minimal
+      - name: Test release tooling and policy
+        run: python -m unittest discover -s tools -p 'test_*.py' -v
+      - name: Check standalone Cargo package
+        run: |
+          cargo +stable package --manifest-path rust/Cargo.toml --locked
+          version=$(python -c 'import tomllib; print(tomllib.load(open("rust/Cargo.toml", "rb"))["package"]["version"])')
+          cargo +stable test --manifest-path "rust/target/package/painter-$version/Cargo.toml" --locked
+          cargo +stable test --manifest-path "rust/target/package/painter-$version/Cargo.toml" --no-default-features --locked
