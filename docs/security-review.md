@@ -225,7 +225,7 @@ information; it is descriptive provenance, not a cryptographic attestation. The
 crate manifest disables registry publication until an owned package name is chosen.
 
 
-## Three-map review (unreleased)
+## Three-map review (v0.3.0)
 
 Semantic channels use one document schema and compositor. Ordinary flattening
 selects color layers; split parts reject map-layer selections. Normal vectors

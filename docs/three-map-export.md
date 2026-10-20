@@ -1,6 +1,6 @@
 # Color, emissive, and normal exports
 
-Unreleased after v0.2.0; use a build containing the three-map changes.
+Available in v0.3.0 and newer.
 
 Projects can author three semantic layer channels. Color remains the visible
 artwork; emissive and normal layers never enter ordinary flattening, previews,

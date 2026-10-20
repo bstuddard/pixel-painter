@@ -1,7 +1,7 @@
 # Pixel Painter
 
-Unreleased [emissive and normal maps](docs/three-map-export.md) extend project
-exports with pixel-aligned lighting data. Review the
+Pixel Painter v0.3.0 adds [emissive and normal maps](docs/three-map-export.md) to
+project exports with pixel-aligned lighting data. Review the
 [editable lighting examples](rust/examples/lighting/README.md) and shared map contract.
 
 Pixel Painter is an offline tool for making pixel-art sprites, tiles, buildings,

@@ -1,6 +1,6 @@
 # Verification
 
-Verification covers the unreleased three-map changes after Pixel Painter v0.2.0,
+Verification covers Pixel Painter v0.3.0 and its three-map exports,
 using Rust 1.99.0 and the declared minimum Rust 1.88.0. Hosted Linux, Windows, and
 macOS checks supplement the local Linux results. A complete four-platform download
 trial remains required before publishing a new release.
@@ -108,8 +108,8 @@ See the [security review](security-review.md) for the threat model and details.
 
 Local archive execution covers Linux. Native Windows/macOS execution runs in CI;
 the release Linux baseline and all four download archives must pass a release
-trial before publication. Binaries are unsigned and not notarized. The three-map
-changes have not been released; the existing v0.2.0 release is unchanged.
+trial before publication. Binaries are unsigned and not notarized. Publication
+status and downloads are listed on [GitHub Releases](https://github.com/bstuddard/pixel-painter/releases).
 
 Tests cover ordinary write/publication failures and export cleanup. They do not
 establish power-loss durability. Export bundles use a manifest-last completion

@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 — preview
 
 - Added semantic color/emissive/normal layers and opt-in three-map exports with
   shared atlas rectangles, coverage rules, vector validation/transforms, and
