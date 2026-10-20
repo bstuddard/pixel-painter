@@ -55,8 +55,8 @@ fn golden_batch_matches_hand_authored_pixels() {
     let summary = operations.apply(&mut canvas).unwrap();
     assert_eq!(summary.changed_pixels, 35);
     let expected: Vec<_> = include_str!("fixtures/gem.txt")
-        .chars()
-        .filter(|c| *c != '\n')
+        .lines()
+        .flat_map(str::chars)
         .map(|c| match c {
             '.' => Pixel::TRANSPARENT,
             'D' => "#283048".parse().unwrap(),

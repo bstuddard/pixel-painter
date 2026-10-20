@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Security boundaries: terminal text, no-clobber writes, and data-only asset names.
 
+#[cfg(unix)]
+use painter::{Canvas, storage};
 use painter::{
-    Canvas, Document, Error,
+    Document, Error,
     atlas::{Atlas, Options},
-    storage,
 };
 use std::fs;
 
