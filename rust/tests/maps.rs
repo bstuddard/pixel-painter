@@ -266,10 +266,22 @@ fn normal_encoding_accepts_unit_quantization_and_rejects_nonfinite_or_zero_vecto
         let pixel = maps::encode_normal(x, y, z, 255).unwrap();
         maps::validate_normals(&Canvas::from_pixels(1, 1, vec![pixel]).unwrap()).unwrap();
     }
+    let diagonal = maps::encode_normal(1.0, -1.0, 1.0, 128).unwrap();
+    for scale in [f64::MAX, f64::MIN_POSITIVE, f64::from_bits(1)] {
+        assert_eq!(
+            maps::encode_normal(scale, -scale, scale, 128).unwrap(),
+            diagonal,
+            "normal encoding must depend on direction, including extreme finite magnitudes"
+        );
+    }
     for direction in [
         (0.0, 0.0, 0.0),
         (f64::INFINITY, 0.0, 1.0),
         (f64::NAN, 1.0, 1.0),
+        (1.0, f64::NAN, 1.0),
+        (1.0, 1.0, f64::NAN),
+        (1.0, f64::NEG_INFINITY, 1.0),
+        (1.0, 1.0, f64::INFINITY),
     ] {
         assert!(maps::encode_normal(direction.0, direction.1, direction.2, 255).is_err());
     }

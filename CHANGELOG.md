@@ -13,6 +13,8 @@
   RGB paint blending of normals are rejected explicitly.
 - Kept example documentation links valid in all four executable download layouts,
   including the three-map guide.
+- Made normal encoding independent of vector magnitude, including finite values
+  near floating-point overflow and subnormal values.
 
 ## 0.2.0 — preview
 

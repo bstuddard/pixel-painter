@@ -28,7 +28,7 @@ checks on each candidate, including both feature configurations of the packaged 
 
 Tests exercise these contracts:
 
-- [Three-map contracts](../rust/tests/maps.rs) and [CLI workflows](../rust/tests/maps_cli.rs): channel isolation, coverage, vectors, generated geometry, shared layout, combined limits, atomic edits, legacy exports, and tampered companion detection.
+- [Three-map contracts](../rust/tests/maps.rs) and [CLI workflows](../rust/tests/maps_cli.rs): channel isolation, coverage, vector encoding at extreme finite magnitudes, generated geometry, shared layout, combined limits, atomic edits, legacy exports, and tampered companion detection.
 - [Coherent authoring](../rust/tests/authoring.rs): typed recipes, transformed
   components, shadows, exact scene pixels, preview limits, stable animation-sheet
   ordering, placement/split exports, pack integrity, and transactional failures.

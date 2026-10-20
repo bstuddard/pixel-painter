@@ -129,12 +129,15 @@ pub const FLAT_NORMAL: Pixel = Pixel::rgba(128, 128, 255, 255);
 
 /// Encode a finite, nonzero direction as XYZ UNORM8; +X right, +Y up, +Z viewer.
 pub fn encode_normal(x: f64, y: f64, z: f64, alpha: u8) -> Result<Pixel> {
-    let length = x.hypot(y).hypot(z);
-    if !length.is_finite() || length == 0.0 {
+    let largest = x.abs().max(y.abs()).max(z.abs());
+    if largest == 0.0 || ![x, y, z].into_iter().all(f64::is_finite) {
         return Err(Error::invalid(
             "normal direction must be finite and nonzero",
         ));
     }
+    // Scale first so extreme finite magnitudes cannot overflow or underflow.
+    let [x, y, z] = [x, y, z].map(|component| component / largest);
+    let length = x.hypot(y).hypot(z);
     let encode = |value: f64| ((value / length + 1.0) * 127.5).round() as u8;
     Ok(Pixel::rgba(encode(x), encode(y), encode(z), alpha))
 }
