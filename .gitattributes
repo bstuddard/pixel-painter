@@ -6,3 +6,4 @@
 # Generated examples have reproducible sources in the gallery/village scripts.
 rust/examples/gallery/** linguist-generated=true
 rust/examples/village/** linguist-generated=true
+rust/examples/lighting/** linguist-generated=true

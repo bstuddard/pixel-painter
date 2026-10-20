@@ -28,6 +28,7 @@ pub mod error;
 pub mod geometry;
 pub mod inspect;
 mod limits;
+pub mod maps;
 pub mod operations;
 pub mod pack;
 pub mod palette;

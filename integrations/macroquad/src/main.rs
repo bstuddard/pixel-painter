@@ -5,6 +5,19 @@ use macroquad::prelude::*;
 use serde::Deserialize;
 use std::collections::BTreeMap;
 
+mod lighting;
+
+#[derive(Deserialize)]
+struct Companion {
+    sheet: String,
+    frames: Vec<String>,
+    encoding: String,
+    #[serde(default)]
+    space: Option<String>,
+    #[serde(default)]
+    positive_y: Option<String>,
+}
+
 #[derive(Deserialize)]
 struct SourceRect {
     x: i32,
@@ -28,13 +41,17 @@ struct Manifest {
     height: u32,
     frames: Vec<Frame>,
     tags: BTreeMap<String, Tag>,
+    #[serde(default)]
+    maps: BTreeMap<String, Companion>,
 }
 
 fn manifest() -> Manifest {
-    let manifest: Manifest = serde_json::from_str(include_str!(
+    parse_manifest(include_str!(
         "../../../rust/examples/gallery/01-crystal-keeper/export/metadata.json"
     ))
-    .expect("valid generated manifest");
+}
+fn parse_manifest(text: &str) -> Manifest {
+    let manifest: Manifest = serde_json::from_str(text).expect("valid generated manifest");
     assert_eq!(manifest.version, 1);
     assert!(!manifest.frames.is_empty());
     for frame in &manifest.frames {
@@ -72,12 +89,20 @@ fn window_conf() -> Conf {
         window_title: "Pixel Painter — exported animation".into(),
         window_width: 1000,
         window_height: 420,
+        platform: macroquad::miniquad::conf::Platform {
+            apple_gfx_api: macroquad::miniquad::conf::AppleGfxApi::OpenGl,
+            ..Default::default()
+        },
         ..Default::default()
     }
 }
 
 #[macroquad::main(window_conf)]
 async fn main() {
+    if std::env::args().any(|arg| arg == "--lighting") {
+        lighting::run(std::env::args().any(|arg| arg == "--smoke-test")).await;
+        return;
+    }
     let manifest = manifest();
     let texture = Texture2D::from_file_with_format(
         include_bytes!("../../../rust/examples/gallery/01-crystal-keeper/export/sheet.png"),

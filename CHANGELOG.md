@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Added semantic color/emissive/normal layers and opt-in three-map exports with
+  shared atlas rectangles, coverage rules, vector validation/transforms, and
+  combined raster limits. Existing color-only outputs remain unchanged.
+- Added transactional geometry color/normal generation, map-aware asset-pack
+  checks, reproducible lighting examples, and an experimental moving-light demo
+  with GPU/reference comparisons, including flip and partial-alpha coverage.
+- Prevented cross-channel merges and map layers in color placement parts; stale
+  companion data is checked before placement export. Map palette quantization and
+  RGB paint blending of normals are rejected explicitly.
+
 - **Breaking:** unified templates and parameterized recipes under
   `recipe::Recipe` and one version-2 JSON schema. `seed`, `palette`, `policy`, and
   `operations` now live at the top level; the nested `batch` template schema is

@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "fill_rect",
+      "x": 2,
+      "y": 2,
+      "width": 11,
+      "height": 11,
+      "color": "#8080FF"
+    },
+    {
+      "op": "fill_rect",
+      "x": 2,
+      "y": 2,
+      "width": 5,
+      "height": 5,
+      "color": "#36C9C9"
+    },
+    {
+      "op": "fill_rect",
+      "x": 9,
+      "y": 10,
+      "width": 4,
+      "height": 3,
+      "color": "#C936C9"
+    }
+  ]
+}

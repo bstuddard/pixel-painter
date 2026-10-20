@@ -611,6 +611,18 @@ fn draw_operation(shape: Draw) -> Result<Operation> {
 
 fn project_command(command: ProjectCommand, json_output: bool) -> Result<()> {
     let (path, project, create_new) = match command {
+        ProjectCommand::Geometry {
+            path,
+            input,
+            normal_layer,
+            palette: palette_path,
+        } => {
+            let shape = painter::assets::read_config(&input)?;
+            let palette = palette(palette_path.as_deref())?;
+            let mut document = storage::load_project(&path)?;
+            document.draw_shape(&shape, normal_layer.as_deref(), palette.as_ref())?;
+            (path, document, false)
+        }
         ProjectCommand::New {
             path,
             width,
@@ -627,9 +639,10 @@ fn project_command(command: ProjectCommand, json_output: bool) -> Result<()> {
             path,
             packing,
             placement,
+            maps,
         } => {
             let document = storage::load_project(&path)?;
-            let atlas = Atlas::from_document(&document, options(&packing))?;
+            let atlas = Atlas::from_document_with_maps(&document, options(&packing), maps)?;
             if let Some(path) = placement {
                 let placement = painter::assets::read_config(&path)?;
                 atlas.export_with_placement(
@@ -664,7 +677,8 @@ fn project_command(command: ProjectCommand, json_output: bool) -> Result<()> {
             match action {
                 LayerAction::Add {
                     name,
-                } => project.add_layer(name)?,
+                    channel,
+                } => project.add_layer_with_channel(name, channel)?,
                 LayerAction::Select {
                     name,
                 } => project.select_layer(&name)?,

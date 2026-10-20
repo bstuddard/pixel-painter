@@ -4,6 +4,7 @@
 use crate::{
     Canvas, Error, ErrorCode, Pixel, Result,
     drawing::{self, Axis, Point, Rect},
+    maps::{self, Channel},
     palette::{Color, Palette, Policy},
 };
 use serde::{Deserialize, Serialize};
@@ -203,11 +204,29 @@ impl Batch {
         self.render_budgeted(canvas, self.seed, &mut remaining)
     }
 
+    pub(crate) fn render_channel(
+        &self,
+        canvas: &Canvas,
+        channel: Channel,
+        remaining: &mut u64,
+    ) -> Result<(Canvas, Summary)> {
+        self.render_budgeted_channel(canvas, self.seed, remaining, channel)
+    }
+
     fn render_budgeted(
         &self,
         canvas: &Canvas,
         seed: u64,
         remaining: &mut u64,
+    ) -> Result<(Canvas, Summary)> {
+        self.render_budgeted_channel(canvas, seed, remaining, Channel::Color)
+    }
+    fn render_budgeted_channel(
+        &self,
+        canvas: &Canvas,
+        seed: u64,
+        remaining: &mut u64,
+        channel: Channel,
     ) -> Result<(Canvas, Summary)> {
         if self.version != 1 {
             return Err(Error::new(
@@ -240,11 +259,29 @@ impl Batch {
         if self.palette.is_none() && !matches!(self.policy, Policy::Unrestricted) {
             return Err(Error::invalid("palette policy requires a palette"));
         }
+        if channel != Channel::Color && !matches!(self.policy, Policy::Unrestricted) {
+            return Err(Error::invalid(
+                "companion map layers require unrestricted palette policy",
+            ));
+        }
         let mut edited = canvas.clone();
         let mut clipboard = BTreeMap::<String, Canvas>::new();
         let mut random = Random(seed);
         for (index, operation) in self.operations.iter().enumerate() {
-            let cost = operation.cost(&edited);
+            if channel == Channel::Normal && operation.blends_paint() {
+                return Err(Error::invalid(
+                    "normal edits replace vectors; alpha paint blending is not supported",
+                )
+                .at(index));
+            }
+            let transform = channel == Channel::Normal
+                && matches!(operation, Operation::Flip { .. } | Operation::Rotate { .. });
+            let cost = operation.cost(&edited)
+                + if transform {
+                    edited.pixels().len() as u64
+                } else {
+                    0
+                };
             *remaining = remaining
                 .checked_sub(cost)
                 .ok_or_else(|| Error::limit("batch exceeds rasterization budget").at(index))?;
@@ -256,9 +293,28 @@ impl Batch {
                     &mut random,
                 )
                 .map_err(|e| e.at(index))?;
+            if transform {
+                for pixel in edited.pixels_mut() {
+                    match operation {
+                        Operation::Flip {
+                            axis,
+                        } => maps::flip_normal(pixel, *axis),
+                        Operation::Rotate {
+                            turns,
+                        } => maps::rotate_normal(pixel, *turns),
+                        _ => unreachable!(),
+                    }
+                }
+            }
         }
         if let Some(palette) = &self.palette {
             palette.constrain_budgeted(&mut edited, self.policy, remaining)?;
+        }
+        if channel == Channel::Normal {
+            *remaining = remaining
+                .checked_sub(edited.pixels().len() as u64)
+                .ok_or_else(|| Error::limit("normal validation exceeds rasterization budget"))?;
+            maps::validate_normals(&edited)?;
         }
         let changed_pixels =
             if (canvas.width(), canvas.height()) == (edited.width(), edited.height()) {
@@ -283,6 +339,43 @@ impl Batch {
 }
 
 impl Operation {
+    fn blends_paint(&self) -> bool {
+        match self {
+            Self::SetPixel {
+                over,
+                ..
+            }
+            | Self::Line {
+                over,
+                ..
+            }
+            | Self::Rect {
+                over,
+                ..
+            }
+            | Self::FillRect {
+                over,
+                ..
+            }
+            | Self::Ellipse {
+                over,
+                ..
+            }
+            | Self::Polygon {
+                over,
+                ..
+            }
+            | Self::Paste {
+                over,
+                ..
+            }
+            | Self::Stamp {
+                over,
+                ..
+            } => *over,
+            _ => false,
+        }
+    }
     fn cost(&self, canvas: &Canvas) -> u64 {
         let rect_cost = |x, y, width, height| {
             Rect {

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Engine-neutral anchors and visual parts, separate from editable raster documents.
 
-use crate::{Canvas, Document, Error, ErrorCode, Result, drawing::Point, storage};
+use crate::{Document, Error, ErrorCode, Result, drawing::Point, storage};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -119,7 +119,12 @@ impl Placement {
                 ));
             }
             for name in &part.layers {
-                document.layer_index(name)?;
+                let index = document.layer_index(name)?;
+                if !document.layers()[index].channel.is_color() {
+                    return Err(Error::invalid(
+                        "placement parts select color layers; companion maps remain frame-aligned",
+                    ));
+                }
                 if !layers.insert(name) {
                     return Err(Error::invalid(
                         "split parts require disjoint layer selections",
@@ -164,21 +169,12 @@ impl Placement {
                 .map(|name| document.layer_index(name))
                 .collect::<Result<Vec<_>>>()?;
             let mut files = Vec::new();
-            for (frame_index, frame) in document.frames().iter().enumerate() {
-                let mut canvas = Canvas::new(document.width(), document.height())?;
-                for (layer, cel) in document
-                    .layers()
-                    .iter()
-                    .zip(&frame.cels)
-                    .enumerate()
-                    .filter_map(|(i, (layer, cel))| indices.contains(&i).then_some((layer, cel)))
-                {
-                    if layer.visible {
-                        for (target, source) in canvas.pixels_mut().iter_mut().zip(cel.pixels()) {
-                            *target = source.over(*target, layer.opacity);
-                        }
-                    }
-                }
+            for frame_index in 0..document.frames().len() {
+                let canvas = document.composite_layers(
+                    frame_index,
+                    crate::maps::Channel::Color,
+                    Some(&indices),
+                )?;
                 let file = format!("parts/{index:04}/{frame_index:04}.png");
                 storage::export_png(&destination.join(&file), &canvas)?;
                 files.push(file);

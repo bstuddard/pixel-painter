@@ -19,14 +19,15 @@ cargo test --manifest-path rust/Cargo.toml --release --no-default-features --loc
 RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path rust/Cargo.toml --no-deps --locked
 ```
 
-The default configuration passes 161 tests, including the doctest, in debug and
-release. Disabling the default `cli` feature passes 121 tests, including the
+The default configuration passes 178 tests, including the doctest, in debug and
+release. Disabling the default `cli` feature passes 135 tests, including the
 doctest, in both profiles; its dependency graph omits
 Clap. Both feature configurations also pass on Rust 1.88.0. CI repeats the core
 checks on each candidate, including both feature configurations of the packaged crate.
 
 Tests exercise these contracts:
 
+- [Three-map contracts](../rust/tests/maps.rs) and [CLI workflows](../rust/tests/maps_cli.rs): channel isolation, coverage, vectors, generated geometry, shared layout, combined limits, atomic edits, legacy exports, and tampered companion detection.
 - [Coherent authoring](../rust/tests/authoring.rs): typed recipes, transformed
   components, shadows, exact scene pixels, preview limits, stable animation-sheet
   ordering, placement/split exports, pack integrity, and transactional failures.
@@ -57,13 +58,13 @@ diff rust/examples/gallery/SHA256SUMS /tmp/painter-gallery/SHA256SUMS
 
 All 120 generated artifact hashes match the checked-in gallery. The independent
 [Macroquad consumer](../integrations/macroquad/README.md) passes formatting,
-Clippy, and its exported-manifest/timing test on stable Rust and Rust 1.88.0.
+Clippy, and its manifest/timing and map-contract tests on stable Rust and Rust 1.88.0.
 Its graphical smoke test rendered three frames under a temporary Xvfb display
 with software OpenGL and exited successfully. It does not link the painter library.
 
 The Village Corner generator also reproduces all 148 artifact hashes. Together,
-the two generators verify 268 artifacts, including editable inputs and encoded
-exports. The final preview optimizations preserve both checksum manifests.
+the three generators verify 336 artifacts, including editable inputs and encoded
+exports. The three-map implementation preserves the existing 268 hashes; the new lighting generator reproduces 68 additional artifacts. Both consumer modes pass graphical smoke tests, including 70 GPU/reference samples across the sign and cottage, flips, partial alpha, and fallbacks.
 
 ## Preview performance
 
