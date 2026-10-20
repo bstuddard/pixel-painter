@@ -4,6 +4,8 @@ This package builds the reusable `painter` library and the `painter` CLI.
 See the [project README](https://github.com/bstuddard/pixel-painter),
 [CLI/format guide](https://github.com/bstuddard/pixel-painter/blob/main/docs/cli-and-formats.md),
 and [review gallery](examples/gallery/README.md).
+The [Village Corner example](examples/village/README.md) exercises coherent asset
+families, parameterized geometry, placement, and offline scene composition.
 
 ```sh
 cargo run --locked -- --help

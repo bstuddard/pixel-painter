@@ -1,0 +1,746 @@
+{
+  "version": 1,
+  "width": 256,
+  "height": 176,
+  "y_sort": true,
+  "tile": "export/assets/0009/export/frames/0000.png",
+  "assets": [
+    {
+      "id": "path-6-1",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 16,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-2",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 32,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-3",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 48,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-4",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 64,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-5",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 80,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-6",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 96,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-7",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 112,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-8",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 128,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-9",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 144,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-10",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 160,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-11",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 176,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-12",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 192,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-13",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 208,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-6-14",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 224,
+        "y": 96
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-1",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 16,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-2",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 32,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-3",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 48,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-4",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 64,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-5",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 80,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-6",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 96,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-7",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 112,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-8",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 128,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-9",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 144,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-10",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 160,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-11",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 176,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-12",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 192,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-13",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 208,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-7-14",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 224,
+        "y": 112
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-1",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 16,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-2",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 32,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-3",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 48,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-4",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 64,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-5",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 80,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-6",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 96,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-7",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 112,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-8",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 128,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-9",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 144,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-10",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 160,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-11",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 176,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-12",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 192,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-13",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 208,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "path-8-14",
+      "input": "export/assets/0010/export/frames/0000.png",
+      "position": {
+        "x": 224,
+        "y": 128
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paving-3",
+      "input": "export/assets/0011/export/frames/0000.png",
+      "position": {
+        "x": 48,
+        "y": 80
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paving-4",
+      "input": "export/assets/0011/export/frames/0000.png",
+      "position": {
+        "x": 64,
+        "y": 80
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paving-5",
+      "input": "export/assets/0011/export/frames/0000.png",
+      "position": {
+        "x": 80,
+        "y": 80
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paving-6",
+      "input": "export/assets/0011/export/frames/0000.png",
+      "position": {
+        "x": 96,
+        "y": 80
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "paving-7",
+      "input": "export/assets/0011/export/frames/0000.png",
+      "position": {
+        "x": 112,
+        "y": 80
+      },
+      "order": -10,
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "cottage",
+      "input": "export/assets/0002/export/frames/0000.png",
+      "position": {
+        "x": 35,
+        "y": 92
+      },
+      "order": 0,
+      "anchor": {
+        "x": 12,
+        "y": 72
+      }
+    },
+    {
+      "id": "workshop",
+      "input": "export/assets/0003/export/frames/0000.png",
+      "position": {
+        "x": 141,
+        "y": 90
+      },
+      "order": 0,
+      "anchor": {
+        "x": 12,
+        "y": 72
+      }
+    },
+    {
+      "id": "bench",
+      "input": "export/assets/0005/export/frames/0000.png",
+      "position": {
+        "x": 119,
+        "y": 149
+      },
+      "order": 0,
+      "anchor": {
+        "x": 24,
+        "y": 34
+      }
+    },
+    {
+      "id": "crate",
+      "input": "export/assets/0004/export/frames/0000.png",
+      "position": {
+        "x": 203,
+        "y": 142
+      },
+      "order": 0,
+      "anchor": {
+        "x": 16,
+        "y": 26
+      }
+    },
+    {
+      "id": "lamp",
+      "input": "export/assets/0006/export/frames/0000.png",
+      "position": {
+        "x": 24,
+        "y": 149
+      },
+      "order": 0,
+      "anchor": {
+        "x": 16,
+        "y": 58
+      }
+    },
+    {
+      "id": "stairs",
+      "input": "export/assets/0008/export/frames/0000.png",
+      "position": {
+        "x": 128,
+        "y": 96
+      },
+      "order": 0,
+      "anchor": {
+        "x": 16,
+        "y": 28
+      }
+    },
+    {
+      "id": "curb",
+      "input": "export/assets/0007/export/frames/0000.png",
+      "position": {
+        "x": 64,
+        "y": 96
+      },
+      "order": 0,
+      "anchor": {
+        "x": 16,
+        "y": 24
+      }
+    },
+    {
+      "id": "tree-trunk",
+      "input": "export/assets/0001/export/frames/0000.png",
+      "position": {
+        "x": 225,
+        "y": 100
+      },
+      "order": 0,
+      "placement": "export/assets/0001/export/placement.json",
+      "part": "trunk"
+    },
+    {
+      "id": "adventurer",
+      "input": "export/assets/0000/export/frames/0000.png",
+      "position": {
+        "x": 214,
+        "y": 101
+      },
+      "order": 0,
+      "anchor": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "id": "tree-canopy",
+      "input": "export/assets/0001/export/frames/0000.png",
+      "position": {
+        "x": 225,
+        "y": 100
+      },
+      "order": 0,
+      "placement": "export/assets/0001/export/placement.json",
+      "part": "canopy"
+    }
+  ]
+}

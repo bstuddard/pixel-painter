@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "colors": {
+    "outline": "#25323A",
+    "top": "#E8D1A3",
+    "front": "#C6AA7A",
+    "side": "#937650",
+    "highlight": "#F3E2BE",
+    "shadow": "#18232B65",
+    "roof": "#B96F5A",
+    "roof_light": "#D79070",
+    "roof_dark": "#804F48",
+    "grass": "#6C8D58",
+    "grass_light": "#89A768",
+    "grass_dark": "#577648",
+    "stone": "#9AA3A0",
+    "stone_light": "#C2C9BB",
+    "stone_dark": "#707E7D",
+    "coat": "#4B9294",
+    "coat_light": "#79B4AB",
+    "coat_dark": "#386B77",
+    "skin": "#D5AA80",
+    "skin_light": "#E9C69B",
+    "hair": "#695244",
+    "boots": "#594B46",
+    "window": "#AED0C6",
+    "gold": "#DBC073"
+  }
+}

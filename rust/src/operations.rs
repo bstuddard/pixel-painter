@@ -180,7 +180,18 @@ impl Batch {
 
     /// Override the procedural stream without copying embedded canvas components.
     pub fn apply_with_seed(&self, canvas: &mut Canvas, seed: u64) -> Result<Summary> {
-        let (edited, summary) = self.render_with_seed(canvas, seed)?;
+        let mut remaining = drawing::MAX_WORK;
+        self.apply_budgeted(canvas, seed, &mut remaining)
+    }
+
+    /// Share rasterization work across recipes while preserving canvas rollback.
+    pub(crate) fn apply_budgeted(
+        &self,
+        canvas: &mut Canvas,
+        seed: u64,
+        remaining: &mut u64,
+    ) -> Result<Summary> {
+        let (edited, summary) = self.render_budgeted(canvas, seed, remaining)?;
         *canvas = edited;
         Ok(summary)
     }
@@ -188,10 +199,16 @@ impl Batch {
     /// Compute an independent result without changing the source. Useful for
     /// document-level invariants that must be checked before committing a cel.
     pub fn render(&self, canvas: &Canvas) -> Result<(Canvas, Summary)> {
-        self.render_with_seed(canvas, self.seed)
+        let mut remaining = drawing::MAX_WORK;
+        self.render_budgeted(canvas, self.seed, &mut remaining)
     }
 
-    fn render_with_seed(&self, canvas: &Canvas, seed: u64) -> Result<(Canvas, Summary)> {
+    fn render_budgeted(
+        &self,
+        canvas: &Canvas,
+        seed: u64,
+        remaining: &mut u64,
+    ) -> Result<(Canvas, Summary)> {
         if self.version != 1 {
             return Err(Error::new(
                 ErrorCode::UnsupportedVersion,
@@ -225,11 +242,10 @@ impl Batch {
         }
         let mut edited = canvas.clone();
         let mut clipboard = BTreeMap::<String, Canvas>::new();
-        let mut remaining = drawing::MAX_WORK;
         let mut random = Random(seed);
         for (index, operation) in self.operations.iter().enumerate() {
             let cost = operation.cost(&edited);
-            remaining = remaining
+            *remaining = remaining
                 .checked_sub(cost)
                 .ok_or_else(|| Error::limit("batch exceeds rasterization budget").at(index))?;
             operation
@@ -242,7 +258,7 @@ impl Batch {
                 .map_err(|e| e.at(index))?;
         }
         if let Some(palette) = &self.palette {
-            palette.constrain_budgeted(&mut edited, self.policy, &mut remaining)?;
+            palette.constrain_budgeted(&mut edited, self.policy, remaining)?;
         }
         let changed_pixels =
             if (canvas.width(), canvas.height()) == (edited.width(), edited.height()) {
@@ -632,5 +648,28 @@ mod tests {
         assert_eq!(random.next(), 0xE220A8397B1DCDAF);
         assert_eq!(random.next(), 0x6E789E6AA1B965F4);
         assert_eq!(random.next(), 0x06C45D188009454F);
+    }
+
+    #[test]
+    fn shared_work_budget_keeps_canvas_rollback_without_resetting() {
+        use super::{Batch, Operation};
+        use crate::{Canvas, ErrorCode, Pixel, palette::Color};
+        let red = Pixel::rgba(255, 0, 0, 255);
+        let blue = Pixel::rgba(0, 0, 255, 255);
+        let mut canvas = Canvas::new(2, 1).unwrap();
+        let mut remaining = 3;
+        Batch::new(vec![Operation::Clear {
+            color: Some(Color::Rgba(red)),
+        }])
+        .apply_budgeted(&mut canvas, 0, &mut remaining)
+        .unwrap();
+        assert_eq!(remaining, 1);
+        let error = Batch::new(vec![Operation::Clear {
+            color: Some(Color::Rgba(blue)),
+        }])
+        .apply_budgeted(&mut canvas, 0, &mut remaining)
+        .unwrap_err();
+        assert_eq!(error.code, ErrorCode::ResourceLimit);
+        assert_eq!(canvas.pixels(), &[red, red]);
     }
 }

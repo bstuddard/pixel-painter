@@ -1,5 +1,35 @@
 # Changelog
 
+## Unreleased
+
+- **Breaking:** unified templates and parameterized recipes under
+  `recipe::Recipe` and one version-2 JSON schema. `seed`, `palette`, `policy`, and
+  `operations` now live at the top level; the nested `batch` template schema is
+  removed. Recipes use the 4 MiB authoring configuration limit. The `template` Rust
+  module and untyped recipe rendering helpers are removed; deserialize `Recipe` and call its `render` method.
+
+- Hardened scene/pack source accounting and shared raster/preparation budgets;
+  escaped terminal controls in CLI JSON while preserving decoded strings.
+- Excluded ignored local files and caches from binary downloads by reading release
+  examples/docs from the committed Git tree, shared with source packaging.
+- Kept generated pack references in portable forward-slash form on Windows,
+  including placement paths and recursive export validation.
+- Eliminated full-canvas copies for unscaled previews and repeated frame-list
+  scans in animation contact sheets; preserved pixel output and frame ordering.
+  Preview scale/dimensions are checked before rendering. The `scene::scaled`
+  helper is now internal; use `drawing::resize` for standalone resizing.
+- Enforced attachment limits after frame overrides merge, before exporting files;
+  excluded motion-exempt poses from animation proportion references.
+
+- Added shared style profiles, role references, and measurable style/animation reports.
+- Added bounded parameterized recipes, variants, transformed components,
+  pixel-aligned face/roof/stair assemblies, and baked silhouette shadows.
+- Added optional placement/attachment/footprint sidecars and split-layer exports,
+  with flattened atlas images available alongside the parts.
+- Added offline scenes/contact sheets, transactional pack generation, and complete
+  export integrity checks from stored editable sources.
+- Added an independently authored, reproducible Village Corner review example.
+
 ## 0.2.0 — preview
 
 - Added a reusable Rust library, transactional operation batches, dry-run, typed
@@ -21,8 +51,8 @@ Existing v0.1.1 canvas JSON and the original CLI commands remain supported. Nati
 project, batch, template, and export formats use version 1. Project migration is
 explicit and creates a new file; keep the original artwork as a backup. Frame
 durations are milliseconds, indices start at zero, and alpha uses straight RGBA.
-Public Rust APIs may evolve before 1.0; versioned file compatibility changes require
-a documented migration. Reproducibility tests cover exact pixels and repeated
+Before 1.0, Rust APIs and file formats may change between minor releases; breaking
+changes are documented here without a requirement to retain old readers. Reproducibility tests cover exact pixels and repeated
 encoded output with the tested version/dependencies; cross-platform byte-identical
 compressed files are not promised.
 

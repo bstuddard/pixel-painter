@@ -1,0 +1,45 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "fill_rect",
+      "x": 0,
+      "y": 0,
+      "width": 9,
+      "height": 10,
+      "color": "#25323A"
+    },
+    {
+      "op": "fill_rect",
+      "x": 1,
+      "y": 1,
+      "width": 7,
+      "height": 8,
+      "color": "#AED0C6"
+    },
+    {
+      "op": "fill_rect",
+      "x": 4,
+      "y": 1,
+      "width": 1,
+      "height": 8,
+      "color": "#937650"
+    },
+    {
+      "op": "fill_rect",
+      "x": 1,
+      "y": 4,
+      "width": 7,
+      "height": 1,
+      "color": "#937650"
+    },
+    {
+      "op": "fill_rect",
+      "x": 0,
+      "y": 9,
+      "width": 9,
+      "height": 1,
+      "color": "#E8D1A3"
+    }
+  ]
+}

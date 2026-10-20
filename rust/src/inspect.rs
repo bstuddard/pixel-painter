@@ -96,3 +96,21 @@ pub fn inspect(canvas: &Canvas, palette: Option<&Palette>) -> Report {
         warnings,
     }
 }
+
+/// Visible bounds without retaining a color histogram.
+pub fn occupied_bounds(canvas: &Canvas) -> Option<Rect> {
+    let (mut left, mut top, mut right, mut bottom) = (canvas.width(), canvas.height(), 0, 0);
+    for (index, _) in canvas.pixels().iter().enumerate().filter(|(_, p)| p.a != 0) {
+        let (x, y) = (index as u32 % canvas.width(), index as u32 / canvas.width());
+        left = left.min(x);
+        top = top.min(y);
+        right = right.max(x);
+        bottom = bottom.max(y);
+    }
+    (left < canvas.width()).then(|| Rect {
+        x: left as i32,
+        y: top as i32,
+        width: right - left + 1,
+        height: bottom - top + 1,
+    })
+}

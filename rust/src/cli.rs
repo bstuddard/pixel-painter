@@ -29,7 +29,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Command {
-    /// Create a transparent legacy-compatible canvas, refusing overwrites.
+    /// Create a transparent canvas, refusing overwrites.
     New {
         #[arg(long, default_value_t = 32)]
         width: u32,
@@ -129,6 +129,44 @@ pub enum Command {
         input: PathBuf,
         #[arg(long)]
         seed: Option<u64>,
+        #[arg(long)]
+        parameters: Option<PathBuf>,
+        #[arg(long)]
+        variant: Option<String>,
+        #[arg(long)]
+        profile: Option<PathBuf>,
+    },
+    /// Apply an integer face assembly to the working artwork.
+    Geometry {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        palette: Option<PathBuf>,
+    },
+    /// Project a pixel-snapped silhouette into a new PNG.
+    Shadow {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        options: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+    },
+    Style {
+        #[command(subcommand)]
+        command: StyleCommand,
+    },
+    Scene {
+        #[command(subcommand)]
+        command: SceneCommand,
+    },
+    Animation {
+        #[command(subcommand)]
+        command: AnimationCommand,
+    },
+    Pack {
+        #[command(subcommand)]
+        command: PackCommand,
     },
     /// Save an independent checkpoint without changing the working artwork.
     Snapshot {
@@ -322,6 +360,8 @@ pub enum ProjectCommand {
         path: PathBuf,
         #[command(flatten)]
         packing: Packing,
+        #[arg(long)]
+        placement: Option<PathBuf>,
     },
     Resize {
         path: PathBuf,
@@ -432,5 +472,78 @@ pub enum TileCommand {
     Seams {
         #[arg(long)]
         rules: PathBuf,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum StyleCommand {
+    Check {
+        #[arg(long)]
+        profile: PathBuf,
+        #[arg(long)]
+        input: PathBuf,
+    },
+    Reference {
+        #[arg(long)]
+        profile: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+    },
+}
+#[derive(Subcommand)]
+pub enum SceneCommand {
+    Render {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        scale: u32,
+    },
+    ContactSheet {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long)]
+        columns: Option<u32>,
+        #[arg(long, default_value_t = 4)]
+        padding: u32,
+        #[arg(long, default_value_t = 4)]
+        scale: u32,
+    },
+}
+#[derive(Subcommand)]
+pub enum AnimationCommand {
+    Check {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        profile: PathBuf,
+        #[arg(long)]
+        placement: Option<PathBuf>,
+    },
+    ContactSheet {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        scale: u32,
+    },
+}
+#[derive(Subcommand)]
+pub enum PackCommand {
+    Generate {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        output: PathBuf,
+    },
+    Check {
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        profile: Option<PathBuf>,
     },
 }

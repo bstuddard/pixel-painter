@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "seed": 47,
+  "profile": "profile.json",
+  "assets": [
+    {
+      "id": "adventurer",
+      "source": {
+        "kind": "artwork",
+        "input": "character/project.painter.json"
+      }
+    },
+    {
+      "id": "tree",
+      "source": {
+        "kind": "artwork",
+        "input": "tree/project.painter.json"
+      },
+      "placement": "tree/placement.json"
+    },
+    {
+      "id": "cottage",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/cottage.json"
+      }
+    },
+    {
+      "id": "workshop",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/cottage.json",
+        "variant": "workshop"
+      }
+    },
+    {
+      "id": "crate",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/crate.json"
+      }
+    },
+    {
+      "id": "bench",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/bench.json"
+      }
+    },
+    {
+      "id": "lamp",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/lamp.json"
+      }
+    },
+    {
+      "id": "curb",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/curb.json"
+      }
+    },
+    {
+      "id": "stairs",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/stairs.json"
+      }
+    },
+    {
+      "id": "grass",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/grass.json"
+      }
+    },
+    {
+      "id": "path",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/path.json"
+      }
+    },
+    {
+      "id": "pavement",
+      "source": {
+        "kind": "recipe",
+        "input": "recipes/pavement.json"
+      }
+    }
+  ]
+}

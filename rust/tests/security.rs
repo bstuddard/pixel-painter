@@ -116,9 +116,8 @@ fn filenames_cannot_inject_terminal_commands_and_json_preserves_the_path() {
         assert!(result.stderr.is_empty());
         let output = String::from_utf8(result.stdout).unwrap();
         if json {
-            // JSON escapes ASCII controls and preserves the original Unicode
-            // value. C1 Unicode controls are legal JSON string contents.
-            assert!(!output.contains(['\x1b', '\x07', '\r', '\t']));
+            // C0/C1 controls use JSON escapes; decoded native path data stays exact.
+            assert!(output.chars().all(|c| !c.is_control() || c == '\n'));
             let value: serde_json::Value = serde_json::from_str(&output).unwrap();
             assert_eq!(value["file"], name);
         } else {

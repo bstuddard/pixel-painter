@@ -1,0 +1,244 @@
+{
+  "version": 1,
+  "image": "sheet.png",
+  "preview": "preview.png",
+  "animation": "animation.png",
+  "width": 96,
+  "height": 96,
+  "frames": [
+    {
+      "name": "frame-0",
+      "file": "frames/0000.png",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 100,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "south-1",
+      "file": "frames/0001.png",
+      "rect": {
+        "x": 24,
+        "y": 0,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "south-2",
+      "file": "frames/0002.png",
+      "rect": {
+        "x": 48,
+        "y": 0,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "east-0",
+      "file": "frames/0003.png",
+      "rect": {
+        "x": 72,
+        "y": 0,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "east-1",
+      "file": "frames/0004.png",
+      "rect": {
+        "x": 0,
+        "y": 32,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "east-2",
+      "file": "frames/0005.png",
+      "rect": {
+        "x": 24,
+        "y": 32,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "north-0",
+      "file": "frames/0006.png",
+      "rect": {
+        "x": 48,
+        "y": 32,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "north-1",
+      "file": "frames/0007.png",
+      "rect": {
+        "x": 72,
+        "y": 32,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "north-2",
+      "file": "frames/0008.png",
+      "rect": {
+        "x": 0,
+        "y": 64,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "west-0",
+      "file": "frames/0009.png",
+      "rect": {
+        "x": 24,
+        "y": 64,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "west-1",
+      "file": "frames/0010.png",
+      "rect": {
+        "x": 48,
+        "y": 64,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    },
+    {
+      "name": "west-2",
+      "file": "frames/0011.png",
+      "rect": {
+        "x": 72,
+        "y": 64,
+        "width": 24,
+        "height": 32
+      },
+      "duration_ms": 160,
+      "pivot": {
+        "x": 12,
+        "y": 28
+      }
+    }
+  ],
+  "tags": {
+    "idle-east": {
+      "frames": [
+        3
+      ],
+      "direction": null
+    },
+    "idle-north": {
+      "frames": [
+        6
+      ],
+      "direction": null
+    },
+    "idle-south": {
+      "frames": [
+        0
+      ],
+      "direction": null
+    },
+    "idle-west": {
+      "frames": [
+        9
+      ],
+      "direction": null
+    },
+    "walk-east": {
+      "frames": [
+        4,
+        5
+      ],
+      "direction": null
+    },
+    "walk-north": {
+      "frames": [
+        7,
+        8
+      ],
+      "direction": null
+    },
+    "walk-south": {
+      "frames": [
+        1,
+        2
+      ],
+      "direction": null
+    },
+    "walk-west": {
+      "frames": [
+        10,
+        11
+      ],
+      "direction": null
+    }
+  }
+}

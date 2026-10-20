@@ -1,0 +1,54 @@
+{
+  "version": 2,
+  "width": 32,
+  "height": 32,
+  "operations": [
+    {
+      "op": "ellipse",
+      "x": 5,
+      "y": 25,
+      "width": 24,
+      "height": 4,
+      "color": "shadow",
+      "fill": true
+    },
+    {
+      "shape": "prism",
+      "x": 5,
+      "y": 12,
+      "width": 18,
+      "height": 14,
+      "depth": 5,
+      "faces": {
+        "top": "top",
+        "front": "front",
+        "side": "side",
+        "outline": "outline"
+      }
+    },
+    {
+      "op": "fill_rect",
+      "x": 6,
+      "y": 17,
+      "width": 16,
+      "height": 1,
+      "color": "side"
+    },
+    {
+      "op": "fill_rect",
+      "x": 6,
+      "y": 22,
+      "width": 16,
+      "height": 1,
+      "color": "side"
+    },
+    {
+      "op": "line",
+      "x1": 7,
+      "y1": 13,
+      "x2": 20,
+      "y2": 24,
+      "color": "highlight"
+    }
+  ]
+}

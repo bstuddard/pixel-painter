@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "width": 32,
+  "height": 32,
+  "operations": [
+    {
+      "shape": "steps",
+      "x": 2,
+      "y": 24,
+      "width": 18,
+      "height": 4,
+      "depth": 3,
+      "count": 3,
+      "faces": {
+        "top": "stone_light",
+        "front": "stone",
+        "side": "stone_dark",
+        "outline": "outline"
+      }
+    }
+  ]
+}

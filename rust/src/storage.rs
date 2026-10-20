@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Bounded input, atomic single-file persistence, and validated image import.
 
-use crate::{Canvas, Document, Error, Pixel, Result};
+use crate::{Canvas, Document, Error, ErrorCode, Pixel, Result};
 use serde::{Serialize, de::DeserializeOwned};
 use std::{
     fs::{self, File},
@@ -220,6 +220,36 @@ pub fn import_png(path: &Path, reduce_16: bool) -> Result<Canvas> {
         })
         .collect();
     Canvas::from_pixels(info.width, info.height, pixels)
+}
+
+/// Exclusively publish a staged directory, with its completion marker last.
+pub(crate) fn publish_bundle(staged: &Path, destination: &Path, marker: &str) -> Result<()> {
+    // Exclusive reservation prevents races with another export. A crash can leave
+    // an incomplete directory; consumers must require the completion marker before loading.
+    fs::create_dir(destination)?;
+    let result = (|| {
+        for entry in fs::read_dir(staged)? {
+            let entry = entry?;
+            if entry.file_name() != marker {
+                fs::rename(entry.path(), destination.join(entry.file_name()))?;
+            }
+        }
+        fs::rename(staged.join(marker), destination.join(marker))?;
+        Ok::<_, std::io::Error>(())
+    })();
+    if let Err(error) = result {
+        if let Err(cleanup) = fs::remove_dir_all(destination) {
+            return Err(Error::new(
+                ErrorCode::IncompleteExport,
+                format!(
+                    "export failed: {error}; cleanup failed: {cleanup}; remove incomplete directory {}",
+                    destination.display()
+                ),
+            ));
+        }
+        return Err(error.into());
+    }
+    Ok(())
 }
 
 #[cfg(test)]

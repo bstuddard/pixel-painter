@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "width": 48,
+  "height": 64,
+  "frames": [
+    {
+      "name": "frame-0",
+      "anchors": {
+        "ground": {
+          "x": 24,
+          "y": 58
+        },
+        "attachments": {
+          "branch": {
+            "x": 29,
+            "y": 30
+          }
+        },
+        "footprint": [
+          {
+            "x": 18,
+            "y": 54
+          },
+          {
+            "x": 31,
+            "y": 54
+          },
+          {
+            "x": 31,
+            "y": 59
+          },
+          {
+            "x": 18,
+            "y": 59
+          }
+        ]
+      }
+    }
+  ],
+  "parts": [
+    {
+      "id": "trunk",
+      "order": 0,
+      "files": [
+        "parts/0000/0000.png"
+      ]
+    },
+    {
+      "id": "canopy",
+      "order": 2,
+      "files": [
+        "parts/0001/0000.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,188 @@
+{
+  "version": 1,
+  "name": "Village Corner",
+  "palette": {
+    "version": 1,
+    "colors": {
+      "boots": {
+        "r": 89,
+        "g": 75,
+        "b": 70,
+        "a": 255
+      },
+      "coat": {
+        "r": 75,
+        "g": 146,
+        "b": 148,
+        "a": 255
+      },
+      "coat_dark": {
+        "r": 56,
+        "g": 107,
+        "b": 119,
+        "a": 255
+      },
+      "coat_light": {
+        "r": 121,
+        "g": 180,
+        "b": 171,
+        "a": 255
+      },
+      "front": {
+        "r": 198,
+        "g": 170,
+        "b": 122,
+        "a": 255
+      },
+      "gold": {
+        "r": 219,
+        "g": 192,
+        "b": 115,
+        "a": 255
+      },
+      "grass": {
+        "r": 108,
+        "g": 141,
+        "b": 88,
+        "a": 255
+      },
+      "grass_dark": {
+        "r": 87,
+        "g": 118,
+        "b": 72,
+        "a": 255
+      },
+      "grass_light": {
+        "r": 137,
+        "g": 167,
+        "b": 104,
+        "a": 255
+      },
+      "hair": {
+        "r": 105,
+        "g": 82,
+        "b": 68,
+        "a": 255
+      },
+      "highlight": {
+        "r": 243,
+        "g": 226,
+        "b": 190,
+        "a": 255
+      },
+      "outline": {
+        "r": 37,
+        "g": 50,
+        "b": 58,
+        "a": 255
+      },
+      "roof": {
+        "r": 185,
+        "g": 111,
+        "b": 90,
+        "a": 255
+      },
+      "roof_dark": {
+        "r": 128,
+        "g": 79,
+        "b": 72,
+        "a": 255
+      },
+      "roof_light": {
+        "r": 215,
+        "g": 144,
+        "b": 112,
+        "a": 255
+      },
+      "shadow": {
+        "r": 24,
+        "g": 35,
+        "b": 43,
+        "a": 101
+      },
+      "side": {
+        "r": 147,
+        "g": 118,
+        "b": 80,
+        "a": 255
+      },
+      "skin": {
+        "r": 213,
+        "g": 170,
+        "b": 128,
+        "a": 255
+      },
+      "skin_light": {
+        "r": 233,
+        "g": 198,
+        "b": 155,
+        "a": 255
+      },
+      "stone": {
+        "r": 154,
+        "g": 163,
+        "b": 160,
+        "a": 255
+      },
+      "stone_dark": {
+        "r": 112,
+        "g": 126,
+        "b": 125,
+        "a": 255
+      },
+      "stone_light": {
+        "r": 194,
+        "g": 201,
+        "b": 187,
+        "a": 255
+      },
+      "top": {
+        "r": 232,
+        "g": 209,
+        "b": 163,
+        "a": 255
+      },
+      "window": {
+        "r": 174,
+        "g": 208,
+        "b": 198,
+        "a": 255
+      }
+    }
+  },
+  "roles": {
+    "front": "front",
+    "highlight": "highlight",
+    "outline": "outline",
+    "shadow": "shadow",
+    "side": "side",
+    "top": "top"
+  },
+  "perspective": "three_quarter",
+  "light": "northwest",
+  "width": {
+    "min": 16,
+    "max": 96
+  },
+  "height": {
+    "min": 16,
+    "max": 96
+  },
+  "grid": 1,
+  "max_colors": 24,
+  "alpha": "any",
+  "outline_thickness": 0,
+  "animation": {
+    "required_tags": [
+      "walk-south",
+      "walk-east",
+      "walk-north",
+      "walk-west"
+    ],
+    "baseline": null,
+    "margin": 1,
+    "max_size_delta": 4,
+    "movement_exceptions": [],
+    "clipping_exceptions": []
+  }
+}

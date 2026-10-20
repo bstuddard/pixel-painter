@@ -1,14 +1,15 @@
 # Pixel Painter
 
-A Rust library and CLI for deterministic pixel-art creation, revision, layered
-animation, and game-ready asset exports. The core works independently of any
-engine and does not require a graphical editor or cloud service.
+Pixel Painter is an offline tool for making pixel-art sprites, tiles, buildings,
+and animations through commands or editable JSON recipes. Save PNGs for any engine,
+or use the Rust library to build your own tools. No cloud service is required.
 
-![Artwork generated through the painter CLI](rust/examples/gallery/overview.png)
+![A village created and composed through painter commands](rust/examples/village/scene.png)
 
-Open the [review gallery](rust/examples/gallery/README.md) for enlarged previews,
-an animated character, a layered cottage, terrain tiles, seeded variants, and
-primitive/component examples. Every folder includes editable inputs and outputs.
+Open [Village Corner](rust/examples/village/README.md) to review a directional
+character, two buildings from one recipe, terrain, stairs, and layered tree overlap.
+Every pixel was created by the CLI. The [original gallery](rust/examples/gallery/README.md)
+adds an animated keeper, a moss cottage, seeded creatures, and reusable components.
 
 ## Quick start
 
@@ -39,11 +40,18 @@ and exports refuse to overwrite files. Run edits sequentially.
 - Versioned projects with layers, visibility, opacity, explicit migration, checkpoints.
 - Frames, durations, pivots, directional tags, sprite sheets, APNG, and metadata.
 - Tiles, source/output spacing, stable IDs, adjacency rules, and exact seam checks.
-- Data-driven templates and reproducible procedural variations using u64 seeds.
+- Parameterized recipes, reusable parts, named variants, and reproducible u64 seeds.
+- Shared style profiles, measurable palette/outline checks, and animation QA.
+- Pixel-aligned roof, facade, prism, and stair helpers, plus baked shadow projection.
+- Ground/attachment anchors, footprints, and split-layer exports for overlap.
+- Offline scene previews, contact sheets, and complete asset-family generation/checks.
 
+The workflow is **commands or recipes → editable source → review → PNG/JSON**.
+Use [coherent asset families](docs/coherent-assets.md) for profiles, parameterized
+recipes, depth helpers, scenes, placement, animation checks, and packs.
 The [CLI and format guide](docs/cli-and-formats.md) specifies schemas, command
 examples, pixel semantics, error contracts, file-safety behavior, and limits.
-The [tightened roadmap](docs/roadmap.md) records the implementation contract.
+The [original roadmap](docs/roadmap.md) and [coherent-assets roadmap](docs/coherent-assets-roadmap.md) record the implementation scope.
 The [security review](docs/security-review.md) describes input/file protections,
 dependency audit results, and the unresolved advisories in the optional consumer.
 The [standalone Macroquad consumer](integrations/macroquad/README.md) animates the
@@ -65,8 +73,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 ```
 
 Canvas and project deserialization validate their invariants. Batches commit only
-on success; persistence is explicit. Public Rust APIs may evolve before 1.0;
-versioned file contracts remain supported or receive explicit migrations.
+on success; persistence is explicit. Before 1.0, Rust APIs and file formats may change between minor releases.
+Breaking changes are documented in the changelog; keep editable source backups.
 
 Library consumers can disable the default `cli` feature to omit Clap:
 
@@ -96,12 +104,13 @@ From the repository root, regenerate the entire gallery into a new folder:
 ```sh
 cargo build --release --locked --manifest-path rust/Cargo.toml
 python3 rust/examples/generate_gallery.py --painter rust/target/release/painter --output /tmp/painter-gallery
+python3 rust/examples/generate_village.py --painter rust/target/release/painter --output /tmp/painter-village
 ```
 
 The generator requires Python 3's standard library and invokes the actual CLI
 for all raster editing. It never deletes or overwrites an existing destination.
 `SHA256SUMS` records every artifact; CI compares regenerated output to the checked-in
-set. Tests cover legacy workflows, exact pixels, alpha, transforms, rollback,
+set. Tests cover CLI workflows, exact pixels, alpha, transforms, rollback,
 limits, malformed inputs, project round trips, atlas/APNG decoding, and seams.
 
 The original [soccer-ball example](rust/examples/soccer-ball.json) remains usable:

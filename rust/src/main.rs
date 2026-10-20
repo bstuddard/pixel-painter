@@ -4,7 +4,9 @@
 #![forbid(unsafe_code)]
 
 mod app;
+mod app_assets;
 mod cli;
+mod json_output;
 mod terminal;
 
 use clap::Parser;
@@ -44,7 +46,7 @@ fn main() -> ExitCode {
     // Once parsing succeeds, Clap is authoritative about flags versus values.
     let json_output = cli.json;
     match app::run(cli) {
-        Ok(()) => ExitCode::SUCCESS,
+        Ok(status) => status,
         Err(error) => {
             report_error(&error, json_output);
             ExitCode::FAILURE
@@ -90,7 +92,11 @@ fn escape_parser_values(error: &mut clap::Error) {
 fn report_error(error: &Error, json_output: bool) {
     let mut stderr = io::stderr().lock();
     if json_output {
-        let _ = serde_json::to_writer(&mut stderr, &json!({"version":1,"ok":false,"error":error}));
+        let _ = json_output::write(
+            &mut stderr,
+            &json!({"version":1,"ok":false,"error":error}),
+            false,
+        );
         let _ = writeln!(stderr);
     } else {
         let _ = writeln!(stderr, "error: {error}");
