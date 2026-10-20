@@ -15,15 +15,25 @@ use std::{io::Write, process::Command};
 
 #[cfg(all(unix, feature = "cli"))]
 #[test]
-fn non_utf8_paths_work_in_human_and_json_modes_without_panicking() {
+fn non_utf8_paths_follow_native_filesystem_rules_without_panicking() {
     use std::{ffi::OsString, os::unix::ffi::OsStringExt};
-    let root = tempfile::tempdir().unwrap();
     for json_mode in [false, true] {
+        let root = tempfile::tempdir().unwrap();
         let path = root.path().join(OsString::from_vec(vec![
             b'a',
             if json_mode { b'j' } else { b'h' },
             0xff,
         ]));
+        // Some Unix filesystems reject non-UTF-8 names. Establish the native
+        // behavior independently so rejection must still produce a clean error.
+        let rejection = match fs::File::create_new(&path) {
+            Ok(file) => {
+                drop(file);
+                fs::remove_file(&path).unwrap();
+                None
+            }
+            Err(error) => Some(error),
+        };
         let mut command = Command::new(env!("CARGO_BIN_EXE_painter"));
         if json_mode {
             command.arg("--json");
@@ -34,6 +44,22 @@ fn non_utf8_paths_work_in_human_and_json_modes_without_panicking() {
             .args(["new", "--width", "1", "--height", "1"])
             .output()
             .unwrap();
+        if let Some(error) = rejection {
+            assert_eq!(result.status.code(), Some(1));
+            assert!(result.stdout.is_empty());
+            if json_mode {
+                let value: serde_json::Value = serde_json::from_slice(&result.stderr).unwrap();
+                assert_eq!(value["error"]["code"], "io_error");
+                assert_eq!(value["error"]["message"], error.to_string());
+            } else {
+                assert_eq!(
+                    String::from_utf8(result.stderr).unwrap(),
+                    format!("error: {error}\n")
+                );
+            }
+            assert!(fs::read_dir(root.path()).unwrap().next().is_none());
+            continue;
+        }
         assert!(
             result.status.success(),
             "{}",

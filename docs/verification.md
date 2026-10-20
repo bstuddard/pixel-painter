@@ -19,7 +19,7 @@ cargo test --manifest-path rust/Cargo.toml --release --no-default-features --loc
 RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path rust/Cargo.toml --no-deps --locked
 ```
 
-The default configuration passes 116 unit/integration tests and one doctest in
+The default configuration passes 117 unit/integration tests and one doctest in
 debug and release. Disabling the default `cli` feature passes 82 library and
 integration tests plus one doctest in both profiles; its dependency graph omits
 Clap. Both feature configurations also pass on Rust 1.88.0. CI repeats the core

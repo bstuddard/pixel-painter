@@ -15,9 +15,11 @@ Global flags can occur before or after subcommands:
 Paths in JSON responses remain strings when they contain valid UTF-8. Otherwise
 they are objects with a readable `display` plus a lossless platform representation:
 `{encoding:"unix_bytes",bytes:[...]}` on Unix, or
-`{encoding:"windows_wide",units:[...]}` on Windows. Native filenames are accepted
-in human and JSON modes; response formatting never converts a successful save
-into a panic because of its filename.
+`{encoding:"windows_wide",units:[...]}` on Windows. Filenames supported by the
+host filesystem work in human and JSON modes; response formatting never converts
+a successful save into a panic because of its filename. Filesystem rejections,
+including unsupported filename encodings, produce ordinary I/O diagnostics and
+leave no saved artwork.
 Human status and error messages escape control characters so filenames cannot
 inject terminal commands. Ordinary Unicode and path separators remain readable;
 JSON path/error values retain the original data through normal JSON serialization.

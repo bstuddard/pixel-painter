@@ -702,6 +702,18 @@ mod tests {
             json!("art/éclair.png")
         );
     }
+    #[cfg(unix)]
+    #[test]
+    fn non_utf8_unix_path_is_reported_losslessly() {
+        use std::{ffi::OsStr, os::unix::ffi::OsStrExt};
+        let bytes = b"art/\xff.png";
+        let path = Path::new(OsStr::from_bytes(bytes));
+        // Serialization must also work on filesystems that reject these names.
+        assert_eq!(
+            path_value(path),
+            json!({"display":path.to_string_lossy(),"encoding":"unix_bytes","bytes":bytes})
+        );
+    }
     #[cfg(windows)]
     #[test]
     fn unpaired_windows_surrogate_is_reported_losslessly() {
