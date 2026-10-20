@@ -325,20 +325,64 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaises(release.ReleaseError):
             release.checksums(output, "0.2.0")
 
+    def test_export_tree_uses_the_selected_commit_instead_of_local_files(self):
+        commit = self.git("rev-parse", "HEAD").strip()
+        original = (self.root / "rust/Cargo.toml").read_bytes()
+        (self.root / "rust/Cargo.toml").write_text("local edit\n", encoding="utf-8")
+        (self.root / "rust/.env").write_text("local-only data\n", encoding="utf-8")
+        destination = self.base / "checkout"
+        release.export_tree(self.root, commit, destination, ("rust",))
+        self.assertEqual((destination / "rust/Cargo.toml").read_bytes(), original)
+        self.assertFalse((destination / "rust/.env").exists())
+
+    def test_export_tree_rejects_committed_symlinks_before_extracting_files(self):
+        # Git's index can represent a link even on systems without symlink privileges.
+        target = self.base / "link-target"
+        target.write_text("../local-only\n", encoding="utf-8")
+        blob = self.git("hash-object", "-w", str(target)).strip()
+        self.git("update-index", "--add", "--cacheinfo", f"120000,{blob},rust/link")
+        self.git(
+            "-c",
+            "user.name=Release Test",
+            "-c",
+            "user.email=release-test@example.invalid",
+            "commit",
+            "--quiet",
+            "-m",
+            "symlink fixture",
+        )
+        commit = self.git("rev-parse", "HEAD").strip()
+        destination = self.base / "checkout"
+        with self.assertRaisesRegex(release.ReleaseError, "symlink"):
+            release.export_tree(self.root, commit, destination)
+        self.assertEqual(list(destination.iterdir()), [])
+
     def test_binary_downloads_include_resolved_readmes_guides_and_notices(self):
         notices = self.notices()
         shutil.copytree(
             release.ROOT / "rust/tests/fixtures", self.root / "rust/tests/fixtures"
         )
-        for name in ["LICENSE", "CHANGELOG.md", "rust/examples/gallery/README.md"]:
+        for name in [
+            "LICENSE",
+            "CHANGELOG.md",
+            "rust/examples/gallery/README.md",
+            "rust/examples/village/README.md",
+            "rust/examples/village/scene.json",
+        ]:
             destination = self.root / name
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text("fixture\n", encoding="utf-8")
         (self.root / "docs").mkdir()
-        for name in ["cli-and-formats.md", "roadmap.md", "security-review.md"]:
+        for name in [
+            "cli-and-formats.md",
+            "roadmap.md",
+            "security-review.md",
+            "coherent-assets.md",
+        ]:
             (self.root / "docs" / name).write_text(
                 "[consumer](../integrations/macroquad/README.md)\n"
-                "Recipe: `tests/fixtures/gem.ops.json`.\n",
+                "Recipe: `tests/fixtures/gem.ops.json`.\n"
+                "[scene](../rust/examples/village/scene.json)\n",
                 encoding="utf-8",
             )
         (self.root / "release").mkdir()
@@ -347,7 +391,16 @@ class ReleaseTests(unittest.TestCase):
         )
         binary = self.base / "executable"
         binary.write_bytes(b"fixture executable")
+        (self.root / ".gitignore").write_text(".env\n__pycache__/\n", encoding="utf-8")
         self.commit()
+        for name in [
+            "rust/examples/.env",
+            "rust/tests/fixtures/.env",
+            "rust/examples/__pycache__/local.pyc",
+        ]:
+            ignored = self.root / name
+            ignored.parent.mkdir(parents=True, exist_ok=True)
+            ignored.write_text("local-only fixture data\n", encoding="utf-8")
         for platform in release.PLATFORMS:
             with self.subTest(platform=platform):
                 archive = release.binary_archive(
@@ -356,6 +409,9 @@ class ReleaseTests(unittest.TestCase):
                 info = release.verify_archive(archive)
                 self.assertEqual(info["platform"], platform)
                 extracted = release.unpack(archive, self.base / f"extract-{platform}")
+                self.assertFalse((extracted / "examples/.env").exists())
+                self.assertFalse((extracted / "examples/recipes/.env").exists())
+                self.assertFalse((extracted / "examples/__pycache__").exists())
                 readme = (extracted / "README.md").read_text(encoding="utf-8")
                 self.assertNotIn("${", readme)
                 self.assertIn(release.PLATFORMS[platform][1], readme)
@@ -366,6 +422,10 @@ class ReleaseTests(unittest.TestCase):
                 self.assertIn(
                     "examples/recipes/gem.ops.json",
                     (extracted / "docs/cli-and-formats.md").read_text(encoding="utf-8"),
+                )
+                self.assertIn(
+                    "../examples/village/scene.json",
+                    (extracted / "docs/coherent-assets.md").read_text(encoding="utf-8"),
                 )
                 self.assertIn(
                     f"/blob/{info['commit']}/integrations/macroquad/README.md",

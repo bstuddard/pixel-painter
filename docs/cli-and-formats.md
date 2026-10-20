@@ -1,4 +1,4 @@
-# CLI and version-1 formats
+# CLI and file formats
 
 Run `painter --help` or any subcommand's `--help` for arguments. Existing `new`,
 `set-pixel`, `print`, `view`, and `export` commands remain supported.
@@ -115,7 +115,10 @@ the same budget. Mapping budget failures roll back the batch. The standalone
 
 ## Templates and deterministic noise
 
-A template is `{version:1,width,height,batch:<version-1 batch>}`. Run:
+A recipe is `{version:2,width,height,seed?,palette?,policy?,operations}`.
+It can also declare parameters, variants, and reusable parts; see
+[the recipe guide](coherent-assets.md#recipes). All recipes use the same typed
+reader and 4 MiB configuration limit. Run:
 
 ```sh
 painter --file slime.json generate --input examples/gallery/04-seeded-slimes/slime.template.json --seed 42
@@ -211,10 +214,11 @@ it is absent for JSON decoding or final palette validation. Codes include
 `permission_denied`, `io_error`, `invalid_png`, `png_error`, `seam_mismatch`,
 `merge_changes_composite`, and `incomplete_export`. Command errors exit 1; argument
 parsing errors exit 2. Successful results contain a format version; legacy canvas
-data itself remains intentionally unversioned for compatibility.
+data itself is an unversioned flat raster.
 
 See the [resource boundary table](roadmap.md#resource-and-compatibility-boundaries).
-Configuration JSON (batches, templates, palettes, metadata) is capped at 64 MiB.
+Configuration JSON (batches, palettes, metadata) is capped at 64 MiB;
+recipes and other authoring configurations use a separate 4 MiB limit.
 Artwork JSON is capped at 2 GiB and streamed: a metadata-only pass validates actual
 pixel counts and aggregate cel storage before the typed raster allocation pass.
 Both passes read the same open file, limit nesting to 128, and reject encoded

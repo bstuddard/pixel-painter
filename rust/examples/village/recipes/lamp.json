@@ -1,0 +1,83 @@
+{
+  "version": 2,
+  "width": 32,
+  "height": 64,
+  "operations": [
+    {
+      "op": "ellipse",
+      "x": 6,
+      "y": 55,
+      "width": 23,
+      "height": 5,
+      "color": "shadow",
+      "fill": true
+    },
+    {
+      "op": "fill_rect",
+      "x": 14,
+      "y": 16,
+      "width": 4,
+      "height": 42,
+      "color": "outline"
+    },
+    {
+      "op": "fill_rect",
+      "x": 15,
+      "y": 18,
+      "width": 1,
+      "height": 38,
+      "color": "stone"
+    },
+    {
+      "op": "fill_rect",
+      "x": 11,
+      "y": 55,
+      "width": 10,
+      "height": 3,
+      "color": "outline"
+    },
+    {
+      "op": "polygon",
+      "points": [
+        {
+          "x": 9,
+          "y": 8
+        },
+        {
+          "x": 16,
+          "y": 4
+        },
+        {
+          "x": 23,
+          "y": 8
+        }
+      ],
+      "color": "outline",
+      "fill": true
+    },
+    {
+      "op": "fill_rect",
+      "x": 10,
+      "y": 9,
+      "width": 13,
+      "height": 10,
+      "color": "outline"
+    },
+    {
+      "op": "fill_rect",
+      "x": 12,
+      "y": 10,
+      "width": 9,
+      "height": 7,
+      "color": "gold"
+    },
+    {
+      "op": "fill_rect",
+      "x": 16,
+      "y": 10,
+      "width": 1,
+      "height": 7,
+      "color": "side"
+    }
+  ]
+}

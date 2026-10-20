@@ -132,7 +132,7 @@ class Gallery:
                 operations += [ellipse(x+3, y+4, 10, 8, "grass_dark"), ellipse(x+4, y+3, 9, 8, "stone"), box(x+5, y+4, 5, 1, "stone_light"), box(x+8, y+9, 4, 1, "grass_dark")]
             if tile in (4, 5, 7):
                 operations += [ellipse(x+2, y+3, 12, 10, "grass_dark"), ellipse(x+3, y+4, 10, 8, "water"), box(x+5, y+5, 5, 1, "water_light"), box(x+7, y+9, 4, 1, "water_light")]
-        template = {"version": 1, "width": 64, "height": 32, "batch": {"version": 1, "seed": 724, "palette": palette, "policy": "strict", "operations": operations}}
+        template = {"version": 2, "width": 64, "height": 32, "seed": 724, "palette": palette, "policy": "strict", "operations": operations}
         write(folder / "terrain.template.json", template)
         canvas = folder / "terrain.json"
         self.run("generate", "--input", folder / "terrain.template.json", file=canvas)
@@ -150,7 +150,7 @@ class Gallery:
         folder.mkdir()
         palette = {"version": 1, "colors": {"outline": "#193F4A", "body": "#47AD91", "shade": "#2C7C79", "light": "#84D9A0", "shine": "#D8F5BB", "eyes": "#193F4A"}}
         operations = [ellipse(3, 19, 19, 4, "#193F4A50"), ellipse(3, 5, 19, 17, "outline"), ellipse(5, 6, 15, 14, "body"), ellipse(5, 15, 15, 5, "shade"), ellipse(6, 7, 12, 8, "light"), op("noise", x=7, y=10, width=10, height=7, colors=["body", "light", "shade"], density=90), ellipse(7, 7, 4, 3, "shine"), box(8, 13, 2, 3, "eyes"), box(15, 13, 2, 3, "eyes"), box(10, 17, 5, 1, "eyes"), box(5, 19, 4, 1, "body"), box(17, 19, 3, 1, "body")]
-        template = {"version": 1, "width": 24, "height": 24, "batch": {"version": 1, "seed": 10, "palette": palette, "operations": operations}}
+        template = {"version": 2, "width": 24, "height": 24, "seed": 10, "palette": palette, "operations": operations}
         write(folder / "slime.template.json", template)
         project = folder / "variants.painter.json"
         self.run("project", "new", project, "--width", 24, "--height", 24)

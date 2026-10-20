@@ -9,8 +9,8 @@ use painter::{
     inspect,
     operations::Batch,
     palette::{Palette, Policy},
+    recipe::{Parameters, Recipe},
     storage,
-    template::Template,
     tileset::{Connection, Edge, Rules, Tileset},
 };
 use serde_json::{Value, json};
@@ -422,11 +422,23 @@ fn inspection_reports_bounds_and_each_alpha_category() {
 
 #[test]
 fn seeded_templates_are_reproducible_and_support_components() {
-    let value = json!({"version":1,"width":16,"height":16,"batch":{"version":1,"seed":42,"operations":[{"op":"noise","x":0,"y":0,"width":16,"height":16,"colors":["#112233","#445566"],"density":128},{"op":"stamp","canvas":{"width":1,"height":1,"pixels":[RED]},"x":2,"y":3}]}});
-    let template: Template = serde_json::from_value(value).unwrap();
-    let a = template.render(None).unwrap();
-    assert_eq!(a, template.render(Some(42)).unwrap());
-    assert_ne!(a, template.render(Some(43)).unwrap());
+    let value = json!({"version":2,"width":16,"height":16,"seed":42,"operations":[{"op":"noise","x":0,"y":0,"width":16,"height":16,"colors":["#112233","#445566"],"density":128},{"op":"stamp","canvas":{"width":1,"height":1,"pixels":[RED]},"x":2,"y":3}]});
+    let template: Recipe = serde_json::from_value(value).unwrap();
+    let a = template
+        .render(&Parameters::new(), None, None, None)
+        .unwrap();
+    assert_eq!(
+        a,
+        template
+            .render(&Parameters::new(), None, Some(42), None)
+            .unwrap()
+    );
+    assert_ne!(
+        a,
+        template
+            .render(&Parameters::new(), None, Some(43), None)
+            .unwrap()
+    );
     assert_eq!(a.pixel(2, 3), Some(RED));
 }
 

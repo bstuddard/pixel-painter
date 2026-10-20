@@ -1,0 +1,59 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "ellipse",
+      "x": 4,
+      "y": 6,
+      "width": 39,
+      "height": 34,
+      "color": "#25323A",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 5,
+      "y": 7,
+      "width": 37,
+      "height": 31,
+      "color": "#577648",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 7,
+      "y": 7,
+      "width": 31,
+      "height": 25,
+      "color": "#6C8D58",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 9,
+      "y": 8,
+      "width": 21,
+      "height": 17,
+      "color": "#89A768",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 4,
+      "y": 23,
+      "width": 19,
+      "height": 15,
+      "color": "#6C8D58",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 29,
+      "y": 21,
+      "width": 13,
+      "height": 14,
+      "color": "#577648",
+      "fill": true
+    }
+  ]
+}

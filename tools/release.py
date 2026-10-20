@@ -324,31 +324,34 @@ def build_info(root, candidate, kind, **fields):
     }
 
 
+def export_tree(root, commit, destination, paths=()):
+    """Read committed files only; ignored local files never enter a download."""
+    destination.mkdir()
+    with tempfile.TemporaryFile(dir=destination.parent) as archive:
+        subprocess.run(
+            ["git", "archive", "--format=tar", commit, *paths],
+            cwd=root,
+            stdout=archive,
+            check=True,
+        )
+        archive.seek(0)
+        with tarfile.open(fileobj=archive) as packed:
+            for member in packed.getmembers():
+                within(destination, member.name)
+                if not member.isfile() and not member.isdir():
+                    raise ReleaseError(
+                        "source checkout contains a symlink or special file"
+                    )
+            packed.extractall(destination, filter="data")
+
+
 def source_archive(root, output, notices, offline):
     candidate = prepare(root)
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="painter-source-", dir=output) as temporary:
         stage = Path(temporary)
         source = stage / f"painter-{candidate['version']}-source"
-        with (stage / "checkout.tar").open("wb") as target:
-            subprocess.run(
-                ["git", "archive", "--format=tar", "HEAD"],
-                cwd=root,
-                stdout=target,
-                check=True,
-            )
-        extracted = stage / "checkout"
-        # git archive has no wrapping directory; validate before extracting it.
-        extracted.mkdir()
-        with tarfile.open(stage / "checkout.tar") as packed:
-            for member in packed.getmembers():
-                within(extracted, member.name)
-                if not member.isfile() and not member.isdir():
-                    raise ReleaseError(
-                        "source checkout contains a symlink or special file"
-                    )
-            packed.extractall(extracted, filter="data")
-        extracted.rename(source)
+        export_tree(root, candidate["commit"], source)
         command = [
             "cargo",
             "vendor",
@@ -375,26 +378,55 @@ def binary_archive(root, output, notices, binary, platform):
     verify_notices(notices, lock_digest(root / "rust/Cargo.lock"))
     output.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(prefix="painter-binary-", dir=output) as temporary:
-        kit = Path(temporary) / f"painter-{candidate['version']}-{platform}"
+        stage = Path(temporary)
+        checkout = stage / "checkout"
+        export_tree(
+            root,
+            candidate["commit"],
+            checkout,
+            (
+                "LICENSE",
+                "CHANGELOG.md",
+                "release/README.md",
+                "docs",
+                "rust/examples",
+                "rust/tests/fixtures",
+            ),
+        )
+        kit = stage / f"painter-{candidate['version']}-{platform}"
         kit.mkdir()
         executable = "painter.exe" if platform.startswith("windows-") else "painter"
         shutil.copy2(binary, kit / executable)
         for name in ["LICENSE", "CHANGELOG.md"]:
-            shutil.copy2(root / name, kit / name)
-        shutil.copytree(root / "rust/examples", kit / "examples")
-        shutil.copytree(root / "rust/tests/fixtures", kit / "examples/recipes")
+            shutil.copy2(checkout / name, kit / name)
+        shutil.copytree(checkout / "rust/examples", kit / "examples")
+        shutil.copytree(checkout / "rust/tests/fixtures", kit / "examples/recipes")
         copy_notices(notices, kit)
         (kit / "docs").mkdir()
         repository = project(root)["repository"].removesuffix(".git")
-        for name in ["cli-and-formats.md", "roadmap.md", "security-review.md"]:
-            text = (root / "docs" / name).read_text(encoding="utf-8")
+        for name in [
+            "cli-and-formats.md",
+            "roadmap.md",
+            "security-review.md",
+            "coherent-assets.md",
+        ]:
+            text = (checkout / "docs" / name).read_text(encoding="utf-8")
             text = text.replace("tests/fixtures/", "examples/recipes/")
+            text = text.replace("rust/examples/", "examples/")
+            text = text.replace("./rust/target/release/painter", "./painter")
+            if name == "coherent-assets.md":
+                text = text.replace(
+                    "Build the CLI once:\n\n```sh\ncargo build --release --locked --manifest-path rust/Cargo.toml\n```",
+                    "Use the included executable; no Rust installation is required.",
+                )
             text = text.replace(
                 "../integrations/macroquad/README.md",
                 f"{repository}/blob/{candidate['commit']}/integrations/macroquad/README.md",
             )
             (kit / "docs" / name).write_text(text, encoding="utf-8")
-        template = Template((root / "release/README.md").read_text(encoding="utf-8"))
+        template = Template(
+            (checkout / "release/README.md").read_text(encoding="utf-8")
+        )
         (kit / "README.md").write_text(
             template.substitute(
                 version=candidate["version"],

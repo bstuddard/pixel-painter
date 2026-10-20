@@ -46,6 +46,100 @@ permission-preserving edits on Unix, and frame names containing traversal syntax
 Additional checks cover parser values, parser JSON, and a hostile Unix `argv[0]`.
 Export frame paths remain generated numeric names, independent of display names.
 
+## Coherent authoring review
+
+The new recipe/scene/pack configurations have a separate 4 MiB cap, bounded
+collections, strict fields, and explicit expansion/depth/work limits. Scalar
+parameters cannot execute code. Scene/pack references are confined to a canonical
+configuration root and reject traversal, absolute/platform-prefixed paths, and
+symlink escapes. Export paths remain generated numeric names. These protections
+assume caller-controlled directories and no hostile concurrent writers.
+
+Placement metadata validates indices, anchors, names, frame counts, and part sizes;
+export rejects stale source documents. Style scans retain at most 257 colors and
+preflight outline work. Animation and pack scans share aggregate source budgets.
+Split outputs and packs use the existing transactional manifest-last publication.
+Pack checks rebuild deterministic exports and compare all generated files, rather
+than implementing a second renderer. This checks consistency, not authenticity.
+
+Regression tests cover scoped symlinks, traversal/platform prefixes, invalid/deep
+parameters, stale placement, part ordering, source frame selection, corrupt/missing
+export files, structured CLI failures, no-clobber outputs, and large-outline budgets.
+The examples include only independently authored generic assets and relative paths.
+
+## Additional security pass
+
+The follow-up review reproduced and fixed three weaknesses in the unreleased
+coherent-authoring implementation:
+
+- **Scene resource accounting:** only displayed flattened pixels counted toward
+  the scene source budget. Other frames/layers could multiply parsing and raster
+  work across references. A shared input budget now charges every project cel
+  before flattening, and includes tiled backgrounds. Scenes retain a separate
+  aggregate cap for scaled asset images. Pack source loading uses the same budget.
+- **Cumulative pack work:** every recipe previously started a new raster budget.
+  One pack now shares the 67,108,864 raster-work allowance across all
+  recipes. Component cloning, flips, and color replacement also consume
+  that allowance before their pixel work starts. Failed batches preserve their
+  input canvas, and failed packs clean up staging without publishing a marker.
+- **Terminal controls in validation JSON:** a crafted pack directory containing a
+  C1 control could appear literally in a default validation report. CLI JSON now
+  escapes C1 and DEL in both output streams, including reports printed without
+  `--json`. Decoded strings and ordinary Unicode remain unchanged. A streaming
+  encoder avoids buffering large reports and handles split UTF-8 writes.
+
+A shared 2 GiB referenced-source/config byte allowance also charges file lengths
+before decoding, including malformed inputs. This prevents continued pack checks
+from avoiding the aggregate allowance through parse failures. Existing per-file
+limits still apply; artwork preflight may read a file twice. Raster accounting
+charges a decoded source before flattening; the final source that exceeds the
+remaining budget can be decoded under its existing per-file cap before rejection.
+These are bounded local operations, not hard process RAM/CPU quotas.
+
+Regression tests exercise hidden frames/layers, malformed input accounting,
+special-file reference rejection, combined recipe exhaustion, component
+preflight, transaction rollback, staging cleanup, crafted report paths, every
+UTF-8 write boundary, and exact JSON string round trips. Both gallery checksum
+manifests verify after regeneration. The refreshed advisory database reports a clean
+core audit and the same two unresolved consumer notices listed below.
+
+Final Rust verification passed 158 CLI/default-feature tests and 118 library-only
+tests in debug/release and on Rust 1.88. Clippy passed with warnings denied locally
+and for Windows x86_64 and both Mac architectures, with/without the CLI. Rustdoc,
+formatting, and local links passed. Both example generators reproduce their 268
+artifact checksum entries. These checks are evidence for this source snapshot,
+not proof that every possible secret or defect has been detected.
+
+Two final correctness fixes validate resolved attachment maps after inheritance
+and exclude motion-exempt poses from animation proportion references. Regressions
+cover failure before publication, the valid 32-name boundary, and genuine drift
+following an exempt first pose.
+
+The final packaging review also reproduced ignored local `.env` files and caches
+entering binary downloads through a working-directory copy. Release packaging now
+reads examples, fixtures, and documentation from the selected immutable Git tree.
+Shared extraction validates paths and rejects symlinks/special files before writing
+any tree contents. Tests exercise ignored files in all four binary layouts,
+immutable commit selection, and a Git symlink fixture without OS symlink privileges.
+No actual credential was found; the reproduction used synthetic local-only data.
+
+## Secret scanning
+
+A separate scan used the official, SHA-256-verified
+[Gitleaks 8.30.1 release](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1).
+Its embedded default rules found no secrets in all 346 tracked and nonignored
+untracked candidate files or in reachable Git history, including deleted
+content. The scan used full redaction, no project ignore list or baseline, and
+ignored inline suppression comments. A synthetic token verified detection.
+
+Supplemental checks found no credential/private-key filenames in the candidate or
+reachable history, no credential literals, credential-bearing URLs, private-key
+headers, or personal home paths in candidate contents, and no PNG text/EXIF metadata.
+The candidate scan was repeated after the pre-1.0 recipe simplification.
+Ignored local files and build output were outside the candidate scan; tracked files
+were included regardless of ignore rules. These checks cannot prove the absence of
+every possible secret.
+
 ## Dependency results
 
 The local scan used the official cargo-audit 0.22.2 Linux release, verified against
@@ -109,6 +203,11 @@ large output can consume substantial memory and disk. Hosting this as an upload
 service would require private immutable input copies, isolated output directories,
 and externally enforced memory, CPU, disk, and execution-time limits. That deployment
 model has not been implemented or tested here.
+
+A final local check rebuilt the latest source and Linux binary archives after the
+security fixes. Extracted Cargo packages, binary smoke tests, and vendored source
+release tests with an empty Cargo cache all passed. Native Windows/macOS execution
+still requires CI on the committed candidate.
 
 Release archives have checksums but are not publisher-signed or notarized. Checksums
 detect mismatches; authenticating the publisher requires a separate signing or

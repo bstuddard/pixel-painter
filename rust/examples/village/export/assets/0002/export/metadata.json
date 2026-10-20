@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "image": "sheet.png",
+  "preview": "preview.png",
+  "animation": null,
+  "width": 96,
+  "height": 96,
+  "frames": [
+    {
+      "name": "frame-0",
+      "file": "frames/0000.png",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 96,
+        "height": 96
+      },
+      "duration_ms": 100,
+      "pivot": null
+    }
+  ],
+  "tags": {}
+}

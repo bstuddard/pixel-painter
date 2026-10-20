@@ -14,7 +14,6 @@ use painter::{
     operations::{Batch, Operation},
     palette::{Color, Palette, Policy},
     storage::{self, Artwork},
-    template::Template,
     tileset::{Rules, Tileset},
 };
 use serde::Serialize;
@@ -24,16 +23,16 @@ use std::{
     path::{Path, PathBuf},
 };
 
-fn emit(value: &impl Serialize) -> Result<()> {
+pub(crate) fn emit(value: &impl Serialize) -> Result<()> {
     let mut stdout = io::stdout().lock();
-    serde_json::to_writer_pretty(&mut stdout, value)?;
+    crate::json_output::write(&mut stdout, value, true)?;
     writeln!(stdout)?;
     Ok(())
 }
 
 /// Preserve ordinary JSON strings and encode otherwise unrepresentable OS paths
 /// losslessly. PathBuf's serializer rejects these paths, which json! would panic on.
-fn path_value(path: &Path) -> serde_json::Value {
+pub(crate) fn path_value(path: &Path) -> serde_json::Value {
     if let Some(path) = path.to_str() {
         return serde_json::Value::String(path.into());
     }
@@ -142,14 +141,45 @@ fn options(packing: &Packing) -> Options {
     }
 }
 
-pub(crate) fn run(cli: Cli) -> Result<()> {
+pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
     let context = Context {
         file: cli.file,
         json: cli.json,
         frame: cli.frame,
         layer: cli.layer,
     };
-    match cli.command {
+    let result = match cli.command {
+        Command::Style {
+            command,
+        } => return crate::app_assets::style(command),
+        Command::Scene {
+            command,
+        } => return crate::app_assets::scene(command),
+        Command::Animation {
+            command,
+        } => return crate::app_assets::animation(command),
+        Command::Pack {
+            command,
+        } => return crate::app_assets::pack(command),
+        Command::Shadow {
+            input,
+            options,
+            output,
+        } => {
+            let source = painter::assets::load_image(&input, 0)?;
+            let options = painter::assets::read_config(&options)?;
+            storage::export_png(&output, &painter::shadow::project(&source, options)?)?;
+            emit(&json!({"version":1,"ok":true,"output":path_value(&output)}))
+        }
+        Command::Geometry {
+            input,
+            palette: path,
+        } => {
+            let shape: painter::geometry::Shape = painter::assets::read_config(&input)?;
+            let mut batch = Batch::new(shape.operations()?);
+            batch.palette = palette(path.as_deref())?;
+            context.edit(batch, false)
+        }
         Command::New {
             width,
             height,
@@ -378,14 +408,39 @@ pub(crate) fn run(cli: Cli) -> Result<()> {
         Command::Generate {
             input,
             seed,
+            parameters,
+            variant,
+            profile,
         } => {
-            let template: Template = storage::read_json(&input)?;
-            let canvas = template.render(seed)?;
+            let parameters = parameters
+                .as_deref()
+                .map(painter::assets::read_config::<painter::recipe::Parameters>)
+                .transpose()?
+                .unwrap_or_default();
+            let profile = profile
+                .as_deref()
+                .map(painter::assets::read_config::<painter::style::Profile>)
+                .transpose()?;
+            let recipe: painter::recipe::Recipe = painter::assets::read_config(&input)?;
+            let seed = seed.unwrap_or(recipe.seed);
+            let canvas = recipe.render(
+                &parameters,
+                variant.as_deref(),
+                Some(seed),
+                profile.as_ref(),
+            )?;
+            if let Some(profile) = &profile
+                && !profile.check(&canvas, "generated")?.valid
+            {
+                return Err(Error::invalid(
+                    "generated artwork violates the style profile",
+                ));
+            }
             storage::save(&context.file, &canvas, true)?;
             message(
                 context.json,
                 format!("Generated {}", context.file.display()),
-                json!({"version":1,"ok":true,"file":path_value(&context.file),"seed":seed.unwrap_or(template.batch.seed)}),
+                json!({"version":1,"ok":true,"file":path_value(&context.file),"seed":seed}),
             )
         }
         Command::Snapshot {
@@ -455,7 +510,8 @@ pub(crate) fn run(cli: Cli) -> Result<()> {
                 }
             }
         }
-    }
+    };
+    result.map(|()| std::process::ExitCode::SUCCESS)
 }
 
 fn draw_operation(shape: Draw) -> Result<Operation> {
@@ -570,9 +626,21 @@ fn project_command(command: ProjectCommand, json_output: bool) -> Result<()> {
         ProjectCommand::Export {
             path,
             packing,
+            placement,
         } => {
-            Atlas::from_document(&storage::load_project(&path)?, options(&packing))?
-                .export(&packing.output, packing.scale)?;
+            let document = storage::load_project(&path)?;
+            let atlas = Atlas::from_document(&document, options(&packing))?;
+            if let Some(path) = placement {
+                let placement = painter::assets::read_config(&path)?;
+                atlas.export_with_placement(
+                    &packing.output,
+                    packing.scale,
+                    &document,
+                    &placement,
+                )?;
+            } else {
+                atlas.export(&packing.output, packing.scale)?;
+            }
             return message(
                 json_output,
                 format!("Exported {}", packing.output.display()),

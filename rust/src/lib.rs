@@ -17,21 +17,30 @@
 #![forbid(unsafe_code)]
 
 pub mod animation;
+pub mod animation_check;
 mod artwork_io;
+pub mod assets;
 pub mod atlas;
 pub mod canvas;
 pub mod document;
 pub mod drawing;
 pub mod error;
+pub mod geometry;
 pub mod inspect;
 mod limits;
 pub mod operations;
+pub mod pack;
 pub mod palette;
 pub mod pixel;
+pub mod placement;
+pub mod recipe;
+pub mod scene;
+pub mod shadow;
 pub mod storage;
-pub mod template;
+pub mod style;
 mod terminal;
 pub mod tileset;
+pub mod validation;
 
 pub use canvas::Canvas;
 pub use document::Document;

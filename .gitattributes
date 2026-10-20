@@ -1,0 +1,8 @@
+# Keep deterministic recipes, metadata, scripts, and checksum manifests portable.
+* text=auto eol=lf
+*.png binary
+*.apng binary
+
+# Generated examples have reproducible sources in the gallery/village scripts.
+rust/examples/gallery/** linguist-generated=true
+rust/examples/village/** linguist-generated=true

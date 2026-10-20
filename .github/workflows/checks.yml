@@ -109,6 +109,13 @@ jobs:
         run: |
           python3 rust/examples/generate_gallery.py --painter rust/target/release/painter --output "$RUNNER_TEMP/gallery"
           diff rust/examples/gallery/SHA256SUMS "$RUNNER_TEMP/gallery/SHA256SUMS"
+      - name: Reproduce coherent village
+        run: |
+          python3 rust/examples/generate_village.py --painter rust/target/release/painter --output "$RUNNER_TEMP/village"
+          diff rust/examples/village/SHA256SUMS "$RUNNER_TEMP/village/SHA256SUMS"
+      - name: Verify village artifact hashes
+        working-directory: rust/examples/village
+        run: sha256sum --check SHA256SUMS
       - name: Verify checked-in artifact hashes
         working-directory: rust/examples/gallery
         run: sha256sum --check SHA256SUMS

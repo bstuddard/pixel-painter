@@ -1,0 +1,91 @@
+{
+  "version": 1,
+  "assets": [
+    {
+      "id": "adventurer",
+      "directory": "assets/0000",
+      "width": 24,
+      "height": 32,
+      "frames": 12
+    },
+    {
+      "id": "tree",
+      "directory": "assets/0001",
+      "width": 48,
+      "height": 64,
+      "frames": 1,
+      "placement": "assets/0001/placement.source.json"
+    },
+    {
+      "id": "cottage",
+      "directory": "assets/0002",
+      "width": 96,
+      "height": 96,
+      "frames": 1
+    },
+    {
+      "id": "workshop",
+      "directory": "assets/0003",
+      "width": 96,
+      "height": 96,
+      "frames": 1
+    },
+    {
+      "id": "crate",
+      "directory": "assets/0004",
+      "width": 32,
+      "height": 32,
+      "frames": 1
+    },
+    {
+      "id": "bench",
+      "directory": "assets/0005",
+      "width": 48,
+      "height": 40,
+      "frames": 1
+    },
+    {
+      "id": "lamp",
+      "directory": "assets/0006",
+      "width": 32,
+      "height": 64,
+      "frames": 1
+    },
+    {
+      "id": "curb",
+      "directory": "assets/0007",
+      "width": 32,
+      "height": 32,
+      "frames": 1
+    },
+    {
+      "id": "stairs",
+      "directory": "assets/0008",
+      "width": 32,
+      "height": 32,
+      "frames": 1
+    },
+    {
+      "id": "grass",
+      "directory": "assets/0009",
+      "width": 16,
+      "height": 16,
+      "frames": 1
+    },
+    {
+      "id": "path",
+      "directory": "assets/0010",
+      "width": 16,
+      "height": 16,
+      "frames": 1
+    },
+    {
+      "id": "pavement",
+      "directory": "assets/0011",
+      "width": 16,
+      "height": 16,
+      "frames": 1
+    }
+  ],
+  "profile": "profile.json"
+}

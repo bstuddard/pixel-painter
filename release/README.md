@@ -24,6 +24,10 @@ Open the [review gallery](examples/gallery/README.md) or the
 describes compatibility and limitations. The [security review](docs/security-review.md)
 explains input protections and the experimental consumer's known advisories.
 
+The [Village Corner example](examples/village/README.md) includes coherent recipes,
+split placement exports, and scene previews. See [coherent asset families](docs/coherent-assets.md)
+for profiles, parameterized recipes, animation checks, and pack generation.
+
 Release CI tests this target on **${baseline}**. Local builds may require newer
 system libraries; `BUILD-INFO.json` records the actual build host. The macOS
 deployment target describes how release binaries are built; versions earlier than

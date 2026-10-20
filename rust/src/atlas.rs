@@ -2,7 +2,7 @@
 //! Deterministic grid packing and manifest-last export bundles.
 
 use crate::{
-    Canvas, Document, Error, ErrorCode, Result,
+    Canvas, Document, Error, Result,
     animation::Tag,
     drawing::{self, Point, Rect},
     storage,
@@ -187,6 +187,52 @@ impl Atlas {
     /// Export to a new directory. metadata.json is the completion marker.
     /// Existing directories are never replaced, even when empty.
     pub fn export(&self, destination: &Path, scale: u32) -> Result<()> {
+        self.export_inner(destination, scale, |_| Ok(()))
+    }
+    /// Export resolved anchors and split-part images alongside the flattened atlas.
+    pub fn export_with_placement(
+        &self,
+        destination: &Path,
+        scale: u32,
+        document: &Document,
+        placement: &crate::placement::Placement,
+    ) -> Result<()> {
+        placement.validate(document)?;
+        if document.width() != self.frames[0].width()
+            || document.height() != self.frames[0].height()
+            || document.frames().len() != self.frames.len()
+            || document
+                .frames()
+                .iter()
+                .zip(&self.metadata.frames)
+                .any(|(a, b)| {
+                    a.name != b.name || a.duration_ms != b.duration_ms || a.pivot != b.pivot
+                })
+        {
+            return Err(Error::invalid(
+                "placement document does not match the atlas",
+            ));
+        }
+        if document.tags() != &self.metadata.tags {
+            return Err(Error::invalid(
+                "placement document tags do not match the atlas",
+            ));
+        }
+        for (index, image) in self.frames.iter().enumerate() {
+            if document.flatten(index)? != *image {
+                return Err(Error::invalid(
+                    "placement document pixels do not match the atlas",
+                ));
+            }
+        }
+        self.export_inner(destination, scale, |stage| placement.write(document, stage))
+    }
+    fn export_inner(
+        &self,
+        destination: &Path,
+        scale: u32,
+        extra: impl FnOnce(&Path) -> Result<()>,
+    ) -> Result<()> {
         if scale == 0 || scale > 64 {
             return Err(Error::invalid("preview scale must be 1..=64"));
         }
@@ -218,6 +264,7 @@ impl Atlas {
         if self.metadata.animation.is_some() {
             self.write_animation(&staged.path().join("animation.png"))?;
         }
+        extra(staged.path())?;
         storage::write_json(&staged.path().join("metadata.json"), &self.metadata, true)?;
         publish(staged.path(), destination)
     }
@@ -247,35 +294,7 @@ impl Atlas {
 }
 
 fn publish(staged: &Path, destination: &Path) -> Result<()> {
-    // Exclusive reservation prevents races with another export. A crash can leave
-    // an incomplete directory; consumers must require metadata.json before loading.
-    fs::create_dir(destination)?;
-    let result = (|| {
-        for entry in fs::read_dir(staged)? {
-            let entry = entry?;
-            if entry.file_name() != "metadata.json" {
-                fs::rename(entry.path(), destination.join(entry.file_name()))?;
-            }
-        }
-        fs::rename(
-            staged.join("metadata.json"),
-            destination.join("metadata.json"),
-        )?;
-        Ok::<_, std::io::Error>(())
-    })();
-    if let Err(error) = result {
-        if let Err(cleanup) = fs::remove_dir_all(destination) {
-            return Err(Error::new(
-                ErrorCode::IncompleteExport,
-                format!(
-                    "export failed: {error}; cleanup failed: {cleanup}; remove incomplete directory {}",
-                    destination.display()
-                ),
-            ));
-        }
-        return Err(error.into());
-    }
-    Ok(())
+    storage::publish_bundle(staged, destination, "metadata.json")
 }
 
 #[cfg(test)]

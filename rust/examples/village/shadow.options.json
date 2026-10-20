@@ -1,0 +1,15 @@
+{
+  "width": 64,
+  "height": 32,
+  "origin": {
+    "x": 1,
+    "y": 2
+  },
+  "step": {
+    "x": 1,
+    "y": 1
+  },
+  "steps": 5,
+  "squash_y": 4,
+  "color": "#18232B65"
+}

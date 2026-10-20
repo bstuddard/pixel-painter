@@ -11,15 +11,19 @@ This is the implementation contract for the roadmap reviewed on 2026-10-19.
 The original baseline was v0.1.1 at commit `4e97077`. Implementation stays in
 one Rust package, with a reusable library and a supported `painter` CLI.
 
+The pre-1.0 policy now allows API and file-format breaks between minor releases;
+the changelog records them. The coherent-authoring update consolidates template
+formats into one recipe schema rather than retaining parallel readers.
+
 ## Principles and public contracts
 
-- Preserve the five existing commands, their defaults, legacy RGBA canvas JSON,
-  native PNG pixels, and refusal to overwrite newly created artwork or exports.
+- Keep flat RGBA canvases, drawing commands, native PNG pixels, and refusal to
+  overwrite newly created artwork or exports.
 - Every public canvas construction/deserialization path validates dimensions
   and pixel count. Invalid storage data cannot become a usable `Canvas`.
-- Version batches, palettes, templates, projects, tile rules, inspection reports,
-  errors, and atlas metadata from their first release. Version 1 is supported;
-  unknown fields and operations in input documents are rejected.
+- Version batches, palettes, recipes, projects, tile rules, inspection reports,
+  errors, and atlas metadata. Reject unsupported schema versions, unknown fields,
+  and unknown operations in input documents.
 - Batch edits compute in memory and commit once. Failures leave the original
   canvas and saved file unchanged. Dry-run computes the same result without saving.
 - JSON command errors appear on stderr as `{version, ok, error}`; errors carry
@@ -117,8 +121,8 @@ carry optional directed right/down adjacency rules in metadata. Validate exact
 opposing-edge RGBA equality for requested connections. Rules describe compatible
 neighbors; automatic terrain synthesis and a map editor are outside this increment.
 
-Templates specify dimensions and a batch. Named palette colors, reusable stamped
-canvas components, and seeded noise enable data-driven variations. Seeds are u64;
+Recipes specify dimensions, optional seed/palette/policy, and operations. Named
+palette colors, reusable stamped canvas components, and seeded noise enable data-driven variations. Seeds are u64;
 noise visits visible pixels row-major with the documented SplitMix64 stream.
 
 Acceptance: checked-in tile seams pass; atlas metadata contains stable IDs/rules;
@@ -138,7 +142,8 @@ the same recipe and seed reproduce bytes; different seeds produce useful variant
 - Tile seams: at most 16,384 rules and 67,108,864 total edge-pixel comparisons.
   Right edges charge tile height; down edges charge tile width. Validate all
   references and the comparison budget before scanning edges or emitting a report.
-- Batch/template/palette/metadata JSON and encoded PNG input: at most 64 MiB.
+- Batch/palette/metadata JSON and encoded PNG input: at most 64 MiB.
+  Recipes and other coherent-authoring configurations: at most 4 MiB.
   Artwork JSON: at most 2 GiB, streamed through a metadata-only preflight that
   validates actual pixel counts and aggregate cels before allocating rasters.
   Artwork readers cap encoded string literals at 4096 bytes and nesting at 128.
@@ -152,7 +157,7 @@ the same recipe and seed reproduce bytes; different seeds produce useful variant
 - Palette mapping is explicit. Transparent hidden RGB is preserved by flat
   storage/transforms; compositing need not preserve invisible source RGB.
 - All timestamps, random filesystem names, and absolute paths stay out of asset
-  metadata. Version changes need documented migrations and compatibility tests.
+  metadata. Format changes need updated documentation, fixtures, and behavior tests.
 
 ## Verification and examples
 

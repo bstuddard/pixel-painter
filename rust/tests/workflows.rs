@@ -414,7 +414,7 @@ fn project_batch_rejects_geometry_change_and_dry_run_leaves_selection_unchanged(
 #[test]
 fn template_generate_extract_stamp_and_png_import_round_trip() {
     let session = Session::new();
-    session.write("recipe.json",json!({"version":1,"width":8,"height":8,"batch":{"version":1,"operations":[{"op":"fill_rect","x":1,"y":1,"width":6,"height":6,"color":"#22446680"}]}}));
+    session.write("recipe.json",json!({"version":2,"width":8,"height":8,"operations":[{"op":"fill_rect","x":1,"y":1,"width":6,"height":6,"color":"#22446680"}]}));
     session.ok(&["generate", "--input", "recipe.json", "--seed", "42"]);
     session.ok(&[
         "extract",

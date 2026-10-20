@@ -3,8 +3,9 @@
 
 use painter::{
     atlas::Metadata,
-    drawing, storage,
-    template::Template,
+    drawing,
+    recipe::{Parameters, Recipe},
+    storage,
     tileset::{Rules, Tileset},
 };
 use std::path::PathBuf;
@@ -55,17 +56,22 @@ fn checked_in_layered_assets_match_exported_frames_and_metadata() {
 #[test]
 fn checked_in_templates_reproduce_every_seeded_canvas() {
     let root = gallery().join("04-seeded-slimes");
-    let template: Template = storage::read_json(&root.join("slime.template.json")).unwrap();
+    let template: Recipe = painter::assets::read_config(&root.join("slime.template.json")).unwrap();
     for seed in [10, 21, 42, 73, 99, 128] {
         assert_eq!(
-            template.render(Some(seed)).unwrap(),
+            template
+                .render(&Parameters::new(), None, Some(seed), None)
+                .unwrap(),
             storage::load(&root.join(format!("slime-{seed}.json"))).unwrap()
         );
     }
     let terrain = gallery().join("03-forest-tiles");
-    let template: Template = storage::read_json(&terrain.join("terrain.template.json")).unwrap();
+    let template: Recipe =
+        painter::assets::read_config(&terrain.join("terrain.template.json")).unwrap();
     assert_eq!(
-        template.render(None).unwrap(),
+        template
+            .render(&Parameters::new(), None, None, None)
+            .unwrap(),
         storage::load(&terrain.join("terrain.json")).unwrap()
     );
 }
