@@ -53,7 +53,9 @@ collections, strict fields, and explicit expansion/depth/work limits. Scalar
 parameters cannot execute code. Scene/pack references are confined to a canonical
 configuration root and reject traversal, absolute/platform-prefixed paths, and
 symlink escapes. Export paths remain generated numeric names. These protections
-assume caller-controlled directories and no hostile concurrent writers.
+assume caller-controlled directories and no hostile concurrent writers. Generated
+pack references use forward slashes on every OS, including recursive integrity
+checks; resolving them retains the same backslash/traversal/root-confinement checks.
 
 Placement metadata validates indices, anchors, names, frame counts, and part sizes;
 export rejects stale source documents. Style scans retain at most 257 colors and

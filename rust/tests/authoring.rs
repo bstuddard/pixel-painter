@@ -765,6 +765,14 @@ fn pack_checks_timing_animation_previews_placement_and_completion_files() {
     let root = AssetRoot::new(directory.path()).unwrap();
     let output = directory.path().join("pack");
     recipe.generate(&root, &output).unwrap();
+    let manifest: Value = assets::read_config(&output.join("pack.json")).unwrap();
+    assert_eq!(manifest["assets"][0]["directory"], "assets/0000");
+    assert_eq!(
+        manifest["assets"][0]["placement"],
+        "assets/0000/placement.source.json"
+    );
+    let report = painter::pack::check(&output, None).unwrap();
+    assert!(report.valid, "{report:?}");
     for file in [
         "assets/0000/export/parts/0000/0000.png",
         "assets/0000/export/preview.png",

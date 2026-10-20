@@ -3,7 +3,7 @@
 
 use crate::{
     Document, Error, ErrorCode, Pixel, Result,
-    assets::{AssetRoot, Budget},
+    assets::{AssetRoot, Budget, join_reference},
     atlas::{Atlas, Options},
     placement::Placement,
     recipe::{Parameters, Recipe as AssetRecipe},
@@ -173,7 +173,7 @@ impl Recipe {
             )?;
             let placement_file = placement
                 .as_ref()
-                .map(|_| directory.join("placement.source.json"));
+                .map(|_| join_reference(&directory, "placement.source.json"));
             if let (Some(placement), Some(path)) = (&placement, &placement_file) {
                 storage::write_json(&stage.path().join(path), placement, true)?;
             }
@@ -259,7 +259,7 @@ pub fn check(directory: &Path, profile: Option<&Profile>) -> Result<Report> {
             );
         }
         let result = (|| -> Result<()> {
-            let source = root.resolve(&asset.directory.join("source.painter.json"))?;
+            let source = root.resolve(&join_reference(&asset.directory, "source.painter.json"))?;
             let storage::Artwork::Project(document) = budget.artwork(&source)? else {
                 return Err(Error::invalid("pack sources must be projects"));
             };
@@ -284,7 +284,11 @@ pub fn check(directory: &Path, profile: Option<&Profile>) -> Result<Report> {
             } else {
                 atlas.export(&expected, 1)?;
             }
-            compare_bundle(&expected, &root, &asset.directory.join("export"))?;
+            compare_bundle(
+                &expected,
+                &root,
+                &join_reference(&asset.directory, "export"),
+            )?;
             previews.push(document.flatten(0)?);
             if let Some(profile) = profile {
                 if document.frames().len() > 1 {
@@ -333,7 +337,7 @@ pub fn check(directory: &Path, profile: Option<&Profile>) -> Result<Report> {
 fn compare_bundle(expected: &Path, actual: &AssetRoot, relative: &Path) -> Result<()> {
     for entry in fs::read_dir(expected)? {
         let entry = entry?;
-        let path = relative.join(entry.file_name());
+        let path = join_reference(relative, entry.file_name());
         if entry.file_type()?.is_dir() {
             compare_bundle(&entry.path(), actual, &path)?;
         } else if !same_file(&entry.path(), &actual.resolve(&path)?)? {
@@ -404,6 +408,7 @@ mod tests {
                 .valid
         );
         assert_eq!(work, 0);
-        assert!(super::check(&output, None).unwrap().valid);
+        let report = super::check(&output, None).unwrap();
+        assert!(report.valid, "{report:?}");
     }
 }

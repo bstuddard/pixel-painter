@@ -71,6 +71,16 @@ pub fn load_image(path: &Path, frame: usize) -> Result<Canvas> {
     Budget::default().image(path, frame)
 }
 
+/// Join reference components with forward slashes on every host OS.
+/// Native `Path::join` is for resolved filesystem paths, not serialized references.
+/// Untrusted references still require validation through `AssetRoot::resolve`.
+pub(crate) fn join_reference(base: &Path, suffix: impl AsRef<Path>) -> PathBuf {
+    let mut reference = base.as_os_str().to_os_string();
+    reference.push("/");
+    reference.push(suffix.as_ref().as_os_str());
+    PathBuf::from(reference)
+}
+
 /// Account for every read, including malformed files and nondisplayed cels.
 /// Metadata charges happen before parsing; decoded raster charges precede flattening.
 pub(crate) struct Budget {

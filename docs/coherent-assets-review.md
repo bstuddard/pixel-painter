@@ -31,7 +31,9 @@ in the [authoring guide](coherent-assets.md).
   Animation motion exceptions cannot become proportion references.
 - Shared asset loading charges referenced bytes, every source cel, and scaled
   images under explicit budgets. Configuration references stay inside a canonical
-  root. Validation details and expansion work are bounded.
+  root. Generated references retain forward slashes on every OS; native filesystem
+  joins happen after reference resolution. Validation details and expansion work
+  are bounded.
 - Packs publish their completion marker last and check exports by rebuilding
   through the renderer. Release downloads read examples/docs from the selected
   Git commit, excluding ignored local files and caches. Source and binary

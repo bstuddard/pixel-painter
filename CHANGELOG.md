@@ -12,6 +12,8 @@
   escaped terminal controls in CLI JSON while preserving decoded strings.
 - Excluded ignored local files and caches from binary downloads by reading release
   examples/docs from the committed Git tree, shared with source packaging.
+- Kept generated pack references in portable forward-slash form on Windows,
+  including placement paths and recursive export validation.
 - Enforced attachment limits after frame overrides merge, before exporting files;
   excluded motion-exempt poses from animation proportion references.
 
