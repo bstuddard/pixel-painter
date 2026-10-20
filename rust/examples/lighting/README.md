@@ -20,7 +20,7 @@ Every folder includes editable projects, authoring inputs, a color-only export,
 and a map-enabled export. Companion files stay native size while `preview.png`
 is enlarged. Ordinary color outputs match between the two export modes.
 
-Reproduce into a new directory:
+Reproduce from the source repository root into a new directory:
 
 ```sh
 python3 rust/examples/generate_lighting.py --painter rust/target/release/painter --output /tmp/painter-lighting

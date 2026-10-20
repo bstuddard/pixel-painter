@@ -21,7 +21,7 @@ import tomllib
 import zipfile
 from pathlib import Path, PurePosixPath
 from string import Template
-from urllib.parse import unquote, urlsplit
+from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 PLATFORMS = {
     "linux-x86_64": ("x86_64-unknown-linux-gnu", "Ubuntu 22.04, GNU libc"),
@@ -268,6 +268,28 @@ def check_links(root):
                     )
 
 
+def relocate_markdown(text, source, destination, mappings):
+    """Keep local links valid when a committed documentation tree moves in a kit."""
+
+    def replace(match):
+        target = urlsplit(match[2])
+        if target.scheme or target.netloc or not target.path:
+            return match[0]
+        original = (source.parent / unquote(target.path)).resolve()
+        for old_root, new_root in mappings:
+            if original.is_relative_to(old_root.resolve()):
+                mapped = new_root / original.relative_to(old_root.resolve())
+                relative = Path(os.path.relpath(mapped, destination.parent)).as_posix()
+                relocated = urlunsplit(
+                    ("", "", quote(relative, safe="/"), target.query, target.fragment)
+                )
+                return match[1] + relocated + match[3]
+        # Unmapped links still go through the package's normal confinement/existence checks.
+        return match[0]
+
+    return re.sub(r"(!?\[[^\]]*\]\()([^\s)]+)(\))", replace, text)
+
+
 def unpack(archive, destination):
     destination.mkdir(parents=True, exist_ok=False)
     if archive.name.endswith(".zip"):
@@ -409,6 +431,7 @@ def binary_archive(root, output, notices, binary, platform):
             "roadmap.md",
             "security-review.md",
             "coherent-assets.md",
+            "three-map-export.md",
         ]:
             text = (checkout / "docs" / name).read_text(encoding="utf-8")
             text = text.replace("tests/fixtures/", "examples/recipes/")
@@ -424,6 +447,23 @@ def binary_archive(root, output, notices, binary, platform):
                 f"{repository}/blob/{candidate['commit']}/integrations/macroquad/README.md",
             )
             (kit / "docs" / name).write_text(text, encoding="utf-8")
+        mappings = [
+            (checkout / "docs", kit / "docs"),
+            (checkout / "rust/examples", kit / "examples"),
+            (checkout / "rust/tests/fixtures", kit / "examples/recipes"),
+        ]
+        for old_root, new_root in mappings[1:]:
+            for source in old_root.rglob("*.md"):
+                destination = new_root / source.relative_to(old_root)
+                destination.write_text(
+                    relocate_markdown(
+                        source.read_text(encoding="utf-8"),
+                        source,
+                        destination,
+                        mappings,
+                    ),
+                    encoding="utf-8",
+                )
         template = Template(
             (checkout / "release/README.md").read_text(encoding="utf-8")
         )

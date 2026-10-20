@@ -11,6 +11,10 @@
 - Prevented cross-channel merges and map layers in color placement parts; stale
   companion data is checked before placement export. Map palette quantization and
   RGB paint blending of normals are rejected explicitly.
+- Kept example documentation links valid in all four executable download layouts,
+  including the three-map guide.
+
+## 0.2.0 — preview
 
 - **Breaking:** unified templates and parameterized recipes under
   `recipe::Recipe` and one version-2 JSON schema. `seed`, `palette`, `policy`, and
@@ -40,8 +44,6 @@
   export integrity checks from stored editable sources.
 - Added an independently authored, reproducible Village Corner review example.
 
-## 0.2.0 — preview
-
 - Added a reusable Rust library, transactional operation batches, dry-run, typed
   JSON results/errors, named palettes, inspection, and deterministic templates.
 - Added integer drawing primitives, components, transforms, PNG import, and
@@ -58,7 +60,7 @@
   `Error::new` and `Error::code` use the enum; JSON code strings are unchanged.
 
 Existing v0.1.1 canvas JSON and the original CLI commands remain supported. Native
-project, batch, template, and export formats use version 1. Project migration is
+project, batch, and export formats use version 1; recipes use version 2. Project migration is
 explicit and creates a new file; keep the original artwork as a backup. Frame
 durations are milliseconds, indices start at zero, and alpha uses straight RGBA.
 Before 1.0, Rust APIs and file formats may change between minor releases; breaking

@@ -215,12 +215,12 @@ model has not been implemented or tested here.
 A final local check rebuilt the latest source and Linux binary archives after the
 security fixes. Extracted Cargo packages, binary smoke tests, and vendored source
 release tests with an empty Cargo cache all passed. Native Windows/macOS execution
-still requires CI on the committed candidate.
+is checked in CI on the committed candidate.
 
 Release archives have checksums but are not publisher-signed or notarized. Checksums
 detect mismatches; authenticating the publisher requires a separate signing or
-attestation process. Hosted Windows/macOS checks and release packaging remain
-pending until their workflows run. `BUILD-INFO.json` records source and compiler
+attestation process. Each new release requires hosted native checks and a full
+packaging trial. `BUILD-INFO.json` records source and compiler
 information; it is descriptive provenance, not a cryptographic attestation. The
 crate manifest disables registry publication until an owned package name is chosen.
 

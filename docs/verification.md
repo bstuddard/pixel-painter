@@ -1,8 +1,9 @@
 # Verification
 
-Local verification targets Pixel Painter v0.2.0 on Linux, using Rust 1.99.0 and
-the declared minimum Rust 1.88.0. Hosted Windows/macOS checks and a complete
-four-platform download trial remain required before publication.
+Verification covers the unreleased three-map changes after Pixel Painter v0.2.0,
+using Rust 1.99.0 and the declared minimum Rust 1.88.0. Hosted Linux, Windows, and
+macOS checks supplement the local Linux results. A complete four-platform download
+trial remains required before publishing a new release.
 
 ## Core checks
 
@@ -95,7 +96,8 @@ commands and publication gates. Local checks cover:
   reporting, the bundled CLI guide commands, and an exact RGBA PNG round trip.
 - License/attribution inventory integrity, archive paths, matching version/commit
   identities, platform filenames, and complete download sets. Fixture checks of
-  Windows/macOS layouts do not execute native binaries.
+  Windows/macOS layouts do not execute native binaries. All four layouts check
+  relocated example links, including nested links with queries and fragments.
 
 The strict core dependency audit reports no vulnerabilities or informational
 warnings. The experimental consumer retains two unsuppressed informational
@@ -104,9 +106,10 @@ See the [security review](security-review.md) for the threat model and details.
 
 ## Limits of this evidence
 
-These results describe local Linux execution, not a completed hosted release
-trial. Native Windows/macOS execution and the release Linux baseline must pass in
-CI. Binaries are unsigned and not notarized. No release has been published.
+Local archive execution covers Linux. Native Windows/macOS execution runs in CI;
+the release Linux baseline and all four download archives must pass a release
+trial before publication. Binaries are unsigned and not notarized. The three-map
+changes have not been released; the existing v0.2.0 release is unchanged.
 
 Tests cover ordinary write/publication failures and export cleanup. They do not
 establish power-loss durability. Export bundles use a manifest-last completion

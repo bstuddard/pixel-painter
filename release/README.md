@@ -28,6 +28,10 @@ The [Village Corner example](examples/village/README.md) includes coherent recip
 split placement exports, and scene previews. See [coherent asset families](docs/coherent-assets.md)
 for profiles, parameterized recipes, animation checks, and pack generation.
 
+The [lighting examples](examples/lighting/README.md) include editable emissive and
+normal maps. The [three-map guide](docs/three-map-export.md) defines their shared
+layout, coverage, vector convention, and geometry authoring commands.
+
 Release CI tests this target on **${baseline}**. Local builds may require newer
 system libraries; `BUILD-INFO.json` records the actual build host. The macOS
 deployment target describes how release binaries are built; versions earlier than
