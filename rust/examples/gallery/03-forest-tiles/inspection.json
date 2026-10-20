@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "width": 64,
+  "height": 32,
+  "pixels": 2048,
+  "transparent_pixels": 0,
+  "partial_alpha_pixels": 0,
+  "opaque_pixels": 2048,
+  "transparency_coverage": 0.0,
+  "occupied_bounds": {
+    "x": 0,
+    "y": 0,
+    "width": 64,
+    "height": 32
+  },
+  "unique_colors": 8,
+  "colors": {
+    "#35664DFF": 480,
+    "#3A8193FF": 165,
+    "#416D4DFF": 238,
+    "#4E8052FF": 892,
+    "#68AFADFF": 27,
+    "#72A15DFF": 78,
+    "#87918AFF": 153,
+    "#ACB4A0FF": 15
+  },
+  "palette_usage": {
+    "edge": 480,
+    "grass": 892,
+    "grass_dark": 238,
+    "grass_light": 78,
+    "stone": 153,
+    "stone_light": 15,
+    "water": 165,
+    "water_light": 27
+  },
+  "off_palette_pixels": 0,
+  "warnings": []
+}

@@ -1,12 +1,28 @@
 [package]
 name = "painter"
-version = "0.1.1"
+version = "0.2.0"
 edition = "2024"
-description = "A CLI pixel painter with persistent RGBA canvases and terminal previews"
+rust-version = "1.88"
+description = "Deterministic pixel-art library and CLI with layers, animation, and asset exports"
 license = "GPL-3.0-only"
+repository = "https://github.com/bstuddard/pixel-painter"
+homepage = "https://github.com/bstuddard/pixel-painter"
+documentation = "https://github.com/bstuddard/pixel-painter#rust-library"
+readme = "README.md"
+# The registry name belongs to another project; GitHub downloads remain supported.
+publish = false
+
+[features]
+default = ["cli"]
+cli = ["dep:clap"]
+
+[[bin]]
+name = "painter"
+path = "src/main.rs"
+required-features = ["cli"]
 
 [dependencies]
-clap = { version = "4.6.7", features = ["derive"] }
+clap = { version = "4.6.7", features = ["derive"], optional = true }
 png = "0.18.1"
 serde = { version = "1.0.229", features = ["derive"] }
 serde_json = "1.0.151"

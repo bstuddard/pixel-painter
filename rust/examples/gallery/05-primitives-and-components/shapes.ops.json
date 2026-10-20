@@ -1,0 +1,93 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "rect",
+      "x": 1,
+      "y": 1,
+      "width": 14,
+      "height": 14,
+      "color": "#536287"
+    },
+    {
+      "op": "ellipse",
+      "x": 3,
+      "y": 3,
+      "width": 10,
+      "height": 10,
+      "color": "#7196B9",
+      "fill": true
+    },
+    {
+      "op": "line",
+      "x1": -4,
+      "y1": 18,
+      "x2": 17,
+      "y2": 29,
+      "color": "#E5B875"
+    },
+    {
+      "op": "polygon",
+      "points": [
+        {
+          "x": 20,
+          "y": 2
+        },
+        {
+          "x": 29,
+          "y": 14
+        },
+        {
+          "x": 17,
+          "y": 14
+        }
+      ],
+      "color": "#D18A88",
+      "fill": true
+    },
+    {
+      "op": "copy",
+      "name": "orb",
+      "x": 1,
+      "y": 1,
+      "width": 14,
+      "height": 14
+    },
+    {
+      "op": "paste",
+      "name": "orb",
+      "x": 32,
+      "y": 1
+    },
+    {
+      "op": "erase",
+      "x": 37,
+      "y": 5,
+      "width": 4,
+      "height": 4
+    },
+    {
+      "op": "fill",
+      "x": 37,
+      "y": 5,
+      "color": "#BEAED4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 20,
+      "y": 20,
+      "width": 8,
+      "height": 7,
+      "color": "#536287"
+    },
+    {
+      "op": "fill_rect",
+      "x": 21,
+      "y": 21,
+      "width": 6,
+      "height": 5,
+      "color": "#E5B87580",
+      "over": true
+    }
+  ]
+}

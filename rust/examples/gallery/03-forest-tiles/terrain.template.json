@@ -1,0 +1,393 @@
+{
+  "version": 1,
+  "width": 64,
+  "height": 32,
+  "batch": {
+    "version": 1,
+    "seed": 724,
+    "palette": {
+      "version": 1,
+      "colors": {
+        "edge": "#35664D",
+        "grass": "#4E8052",
+        "grass_light": "#72A15D",
+        "grass_dark": "#416D4D",
+        "stone": "#87918A",
+        "stone_light": "#ACB4A0",
+        "water": "#3A8193",
+        "water_light": "#68AFAD"
+      }
+    },
+    "policy": "strict",
+    "operations": [
+      {
+        "op": "clear",
+        "color": "edge"
+      },
+      {
+        "op": "fill_rect",
+        "x": 1,
+        "y": 1,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 2,
+        "y": 2,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "fill_rect",
+        "x": 17,
+        "y": 1,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 18,
+        "y": 2,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "fill_rect",
+        "x": 33,
+        "y": 1,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 34,
+        "y": 2,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 35,
+        "y": 4,
+        "width": 10,
+        "height": 8,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 36,
+        "y": 3,
+        "width": 9,
+        "height": 8,
+        "color": "stone",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 37,
+        "y": 4,
+        "width": 5,
+        "height": 1,
+        "color": "stone_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 40,
+        "y": 9,
+        "width": 4,
+        "height": 1,
+        "color": "grass_dark"
+      },
+      {
+        "op": "fill_rect",
+        "x": 49,
+        "y": 1,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 50,
+        "y": 2,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 51,
+        "y": 4,
+        "width": 10,
+        "height": 8,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 52,
+        "y": 3,
+        "width": 9,
+        "height": 8,
+        "color": "stone",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 53,
+        "y": 4,
+        "width": 5,
+        "height": 1,
+        "color": "stone_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 56,
+        "y": 9,
+        "width": 4,
+        "height": 1,
+        "color": "grass_dark"
+      },
+      {
+        "op": "fill_rect",
+        "x": 1,
+        "y": 17,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 2,
+        "y": 18,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 2,
+        "y": 19,
+        "width": 12,
+        "height": 10,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 3,
+        "y": 20,
+        "width": 10,
+        "height": 8,
+        "color": "water",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 5,
+        "y": 21,
+        "width": 5,
+        "height": 1,
+        "color": "water_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 7,
+        "y": 25,
+        "width": 4,
+        "height": 1,
+        "color": "water_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 17,
+        "y": 17,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 18,
+        "y": 18,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 18,
+        "y": 19,
+        "width": 12,
+        "height": 10,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 19,
+        "y": 20,
+        "width": 10,
+        "height": 8,
+        "color": "water",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 21,
+        "y": 21,
+        "width": 5,
+        "height": 1,
+        "color": "water_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 23,
+        "y": 25,
+        "width": 4,
+        "height": 1,
+        "color": "water_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 33,
+        "y": 17,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 34,
+        "y": 18,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 35,
+        "y": 20,
+        "width": 10,
+        "height": 8,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 36,
+        "y": 19,
+        "width": 9,
+        "height": 8,
+        "color": "stone",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 37,
+        "y": 20,
+        "width": 5,
+        "height": 1,
+        "color": "stone_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 40,
+        "y": 25,
+        "width": 4,
+        "height": 1,
+        "color": "grass_dark"
+      },
+      {
+        "op": "fill_rect",
+        "x": 49,
+        "y": 17,
+        "width": 14,
+        "height": 14,
+        "color": "grass"
+      },
+      {
+        "op": "noise",
+        "x": 50,
+        "y": 18,
+        "width": 12,
+        "height": 12,
+        "colors": [
+          "grass_light",
+          "grass_dark"
+        ],
+        "density": 65
+      },
+      {
+        "op": "ellipse",
+        "x": 50,
+        "y": 19,
+        "width": 12,
+        "height": 10,
+        "color": "grass_dark",
+        "fill": true
+      },
+      {
+        "op": "ellipse",
+        "x": 51,
+        "y": 20,
+        "width": 10,
+        "height": 8,
+        "color": "water",
+        "fill": true
+      },
+      {
+        "op": "fill_rect",
+        "x": 53,
+        "y": 21,
+        "width": 5,
+        "height": 1,
+        "color": "water_light"
+      },
+      {
+        "op": "fill_rect",
+        "x": 55,
+        "y": 25,
+        "width": 4,
+        "height": 1,
+        "color": "water_light"
+      }
+    ]
+  }
+}

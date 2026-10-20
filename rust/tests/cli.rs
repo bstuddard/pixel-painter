@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
+#![cfg(feature = "cli")]
+
 use serde_json::Value;
 use std::fs;
 use std::process::{Command, Output};

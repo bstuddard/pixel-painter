@@ -1,0 +1,60 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "polygon",
+      "points": [
+        {
+          "x": 17,
+          "y": 16
+        },
+        {
+          "x": 23,
+          "y": 11
+        },
+        {
+          "x": 29,
+          "y": 16
+        },
+        {
+          "x": 29,
+          "y": 23
+        },
+        {
+          "x": 25,
+          "y": 27
+        },
+        {
+          "x": 18,
+          "y": 23
+        }
+      ],
+      "color": "#303B70",
+      "fill": true
+    },
+    {
+      "op": "fill_rect",
+      "x": 21,
+      "y": 14,
+      "width": 2,
+      "height": 10,
+      "color": "#5864A0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 17,
+      "y": 24,
+      "width": 14,
+      "height": 2,
+      "color": "#929ED0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 22,
+      "y": 26,
+      "width": 3,
+      "height": 4,
+      "color": "#D8AC61"
+    }
+  ]
+}

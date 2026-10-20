@@ -1,0 +1,262 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "fill_rect",
+      "x": 18,
+      "y": 37,
+      "width": 7,
+      "height": 9,
+      "color": "#263B43"
+    },
+    {
+      "op": "fill_rect",
+      "x": 19,
+      "y": 38,
+      "width": 5,
+      "height": 6,
+      "color": "#E9BB71"
+    },
+    {
+      "op": "fill_rect",
+      "x": 19,
+      "y": 38,
+      "width": 2,
+      "height": 3,
+      "color": "#FFE5A1"
+    },
+    {
+      "op": "fill_rect",
+      "x": 21,
+      "y": 38,
+      "width": 1,
+      "height": 6,
+      "color": "#6B5552"
+    },
+    {
+      "op": "fill_rect",
+      "x": 19,
+      "y": 41,
+      "width": 5,
+      "height": 1,
+      "color": "#6B5552"
+    },
+    {
+      "op": "fill_rect",
+      "x": 17,
+      "y": 45,
+      "width": 9,
+      "height": 2,
+      "color": "#71584E"
+    },
+    {
+      "op": "fill_rect",
+      "x": 17,
+      "y": 45,
+      "width": 9,
+      "height": 1,
+      "color": "#B28766"
+    },
+    {
+      "op": "fill_rect",
+      "x": 43,
+      "y": 37,
+      "width": 7,
+      "height": 9,
+      "color": "#263B43"
+    },
+    {
+      "op": "fill_rect",
+      "x": 44,
+      "y": 38,
+      "width": 5,
+      "height": 6,
+      "color": "#E9BB71"
+    },
+    {
+      "op": "fill_rect",
+      "x": 44,
+      "y": 38,
+      "width": 2,
+      "height": 3,
+      "color": "#FFE5A1"
+    },
+    {
+      "op": "fill_rect",
+      "x": 46,
+      "y": 38,
+      "width": 1,
+      "height": 6,
+      "color": "#6B5552"
+    },
+    {
+      "op": "fill_rect",
+      "x": 44,
+      "y": 41,
+      "width": 5,
+      "height": 1,
+      "color": "#6B5552"
+    },
+    {
+      "op": "fill_rect",
+      "x": 42,
+      "y": 45,
+      "width": 9,
+      "height": 2,
+      "color": "#71584E"
+    },
+    {
+      "op": "fill_rect",
+      "x": 42,
+      "y": 45,
+      "width": 9,
+      "height": 1,
+      "color": "#B28766"
+    },
+    {
+      "op": "fill_rect",
+      "x": 9,
+      "y": 49,
+      "width": 1,
+      "height": 3,
+      "color": "#81AA64"
+    },
+    {
+      "op": "fill_rect",
+      "x": 8,
+      "y": 48,
+      "width": 3,
+      "height": 2,
+      "color": "#E9A687"
+    },
+    {
+      "op": "fill_rect",
+      "x": 9,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 50,
+      "y": 49,
+      "width": 1,
+      "height": 3,
+      "color": "#81AA64"
+    },
+    {
+      "op": "fill_rect",
+      "x": 49,
+      "y": 48,
+      "width": 3,
+      "height": 2,
+      "color": "#E9A687"
+    },
+    {
+      "op": "fill_rect",
+      "x": 50,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 15,
+      "y": 53,
+      "width": 1,
+      "height": 3,
+      "color": "#81AA64"
+    },
+    {
+      "op": "fill_rect",
+      "x": 14,
+      "y": 52,
+      "width": 3,
+      "height": 2,
+      "color": "#E9A687"
+    },
+    {
+      "op": "fill_rect",
+      "x": 15,
+      "y": 52,
+      "width": 1,
+      "height": 1,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 54,
+      "y": 46,
+      "width": 1,
+      "height": 3,
+      "color": "#81AA64"
+    },
+    {
+      "op": "fill_rect",
+      "x": 53,
+      "y": 45,
+      "width": 3,
+      "height": 2,
+      "color": "#E9A687"
+    },
+    {
+      "op": "fill_rect",
+      "x": 54,
+      "y": 45,
+      "width": 1,
+      "height": 1,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 8,
+      "y": 51,
+      "width": 1,
+      "height": 3,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "ellipse",
+      "x": 5,
+      "y": 48,
+      "width": 7,
+      "height": 4,
+      "color": "#BC6A67",
+      "fill": true
+    },
+    {
+      "op": "fill_rect",
+      "x": 7,
+      "y": 48,
+      "width": 1,
+      "height": 1,
+      "color": "#FFE4B4"
+    },
+    {
+      "op": "fill_rect",
+      "x": 51,
+      "y": 12,
+      "width": 2,
+      "height": 1,
+      "color": "#D2DCCD90"
+    },
+    {
+      "op": "fill_rect",
+      "x": 52,
+      "y": 8,
+      "width": 3,
+      "height": 2,
+      "color": "#D2DCCD60"
+    },
+    {
+      "op": "fill_rect",
+      "x": 50,
+      "y": 4,
+      "width": 4,
+      "height": 2,
+      "color": "#D2DCCD30"
+    }
+  ]
+}

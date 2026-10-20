@@ -5,9 +5,21 @@ target/
 *.profraw
 *.profdata
 
+# Python tooling and local environments
+__pycache__/
+*.py[cod]
+.ruff_cache/
+.venv/
+
 # Local canvas (the named sample artworks remain versioned)
 /canvas.json
 /rust/canvas.json
+
+# Quick-start outputs (keep named PNGs under examples visible to Git)
+/preview.png
+/artwork.png
+/rust/preview.png
+/rust/artwork.png
 
 # Local game-art experiments
 /local-assets/
@@ -16,12 +28,13 @@ target/
 .env
 .env.*
 !.env.example
+/.aws/
 /.agents/
 /.codex/
-/docs/release-review.md
 
 # Editor and OS artifacts
 *.swp
 *.swo
 .DS_Store
 Thumbs.db
+Desktop.ini

@@ -6,9 +6,14 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Existing tag to publish (leave blank for a trial build)'
+        description: Existing version tag (leave blank for a trial build)
         required: false
         type: string
+      publish:
+        description: Publish the checked tag as a public preview release
+        required: true
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -21,52 +26,63 @@ jobs:
   prepare:
     runs-on: ubuntu-22.04
     outputs:
-      version: ${{ steps.version.outputs.version }}
-      tag: ${{ steps.version.outputs.tag }}
-      commit: ${{ steps.version.outputs.commit }}
+      version: ${{ steps.candidate.outputs.version }}
+      tag: ${{ steps.candidate.outputs.tag }}
+      commit: ${{ steps.candidate.outputs.commit }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
+          fetch-depth: 0
           ref: ${{ inputs.tag || github.ref }}
-      - name: Read version and validate tag
-        id: version
-        shell: bash
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - name: Validate immutable release candidate
+        id: candidate
         env:
           RELEASE_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
-        run: |
-          version=$(sed -n 's/^version = "\([^"]*\)"/\1/p' rust/Cargo.toml)
-          test -n "$version"
-          if [[ -n "$RELEASE_TAG" ]]; then
-            test "$RELEASE_TAG" = "v$version"
-            test "$(git rev-parse HEAD)" = "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")"
-          fi
-          echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
-          echo "commit=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          REQUEST_PUBLISH: ${{ inputs.publish && 'true' || 'false' }}
+        run: python tools/release.py prepare --tag "$RELEASE_TAG" --publish "$REQUEST_PUBLISH" --github-output "$GITHUB_OUTPUT"
+
+  checks:
+    needs: prepare
+    uses: ./.github/workflows/checks.yml
+    with:
+      revision: ${{ needs.prepare.outputs.commit }}
+
+  source:
+    needs: [prepare, checks]
+    runs-on: ubuntu-22.04
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.commit }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
       - name: Install Rust
         run: rustup toolchain install stable --profile minimal
-      # Include dependency sources so the matching source can be rebuilt offline.
-      - name: Package source
-        env:
-          VERSION: ${{ steps.version.outputs.version }}
-        run: |
-          name="painter-$VERSION-source"
-          mkdir -p "dist/$name"
-          git archive HEAD | tar -x -C "dist/$name"
-          cd "dist/$name/rust"
-          mkdir -p .cargo
-          cargo +stable vendor --locked vendor > .cargo/config.toml
-          cd ../../..
-          tar -czf "dist/$name.tar.gz" -C dist "$name"
-      - uses: actions/upload-artifact@v7
+      - name: Package source and dependency notices
+        run: python tools/release.py source --output dist --notices "$RUNNER_TEMP/core-notices"
+      - name: Test extracted source offline with an empty Cargo cache
+        run: python tools/release.py verify "dist/painter-$VERSION-source.tar.gz" --offline-build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: package-source
           path: dist/*.tar.gz
           if-no-files-found: error
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: core-notices
+          path: ${{ runner.temp }}/core-notices/
+          if-no-files-found: error
 
   build:
-    needs: prepare
+    needs: [prepare, checks, source]
     strategy:
       fail-fast: false
       matrix:
@@ -75,21 +91,25 @@ jobs:
             target: x86_64-unknown-linux-gnu
             platform: linux-x86_64
             binary: painter
+            archive: tar.gz
             rustflags: ''
           - os: windows-2022
             target: x86_64-pc-windows-msvc
             platform: windows-x86_64
             binary: painter.exe
+            archive: zip
             rustflags: '-C target-feature=+crt-static'
           - os: macos-15
             target: aarch64-apple-darwin
             platform: macos-aarch64
             binary: painter
+            archive: tar.gz
             rustflags: ''
           - os: macos-15-intel
             target: x86_64-apple-darwin
             platform: macos-x86_64
             binary: painter
+            archive: tar.gz
             rustflags: ''
     runs-on: ${{ matrix.os }}
     env:
@@ -97,56 +117,35 @@ jobs:
       PLATFORM: ${{ matrix.platform }}
       TARGET: ${{ matrix.target }}
       BINARY: ${{ matrix.binary }}
+      ARCHIVE: ${{ matrix.archive }}
       RUSTFLAGS: ${{ matrix.rustflags }}
       MACOSX_DEPLOYMENT_TARGET: '13.0'
     defaults:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           ref: ${{ needs.prepare.outputs.commit }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: core-notices
+          path: ${{ runner.temp }}/core-notices
       - name: Install Rust
         run: rustup toolchain install stable --profile minimal --target "$TARGET"
       - name: Test and build
-        working-directory: rust
         run: |
-          cargo +stable test --release --locked --target "$TARGET"
-          cargo +stable build --release --locked --target "$TARGET"
-      - name: Prepare download
-        run: |
-          name="painter-$VERSION-$PLATFORM"
-          mkdir -p "dist/$name"
-          cp "rust/target/$TARGET/release/$BINARY" "dist/$name/"
-          cp LICENSE README.md "dist/$name/"
-          cp -R rust/examples "dist/$name/examples"
-          cat > "dist/$name/RUNNING.txt" <<'EOF'
-          Open a terminal in this folder. Rust is not required.
-          Linux/macOS: ./painter --help
-          Windows PowerShell: .\painter.exe --help
-          Preview: ./painter --file examples/soccer-ball.json view
-          Use .\painter.exe instead of ./painter on Windows.
-          Binaries are not publisher-signed or notarized.
-          See LICENSE; matching application and dependency sources are in
-          painter-VERSION-source.tar.gz alongside this download.
-          Rebuild sources from rust/: cargo build --release --locked --offline
-          EOF
-          "dist/$name/$BINARY" --help
-          "dist/$name/$BINARY" --file "dist/$name/examples/soccer-ball.json" view > /dev/null
-          "dist/$name/$BINARY" --file "dist/$name/examples/soccer-ball.json" export --output dist/smoke.png
-      - name: Archive Linux and macOS
-        if: runner.os != 'Windows'
-        run: |
-          name="painter-$VERSION-$PLATFORM"
-          tar -czf "dist/$name.tar.gz" -C dist "$name"
-      - name: Archive Windows
-        if: runner.os == 'Windows'
-        shell: pwsh
-        run: |
-          $name = "painter-$env:VERSION-$env:PLATFORM"
-          Compress-Archive -Path "dist/$name" -DestinationPath "dist/$name.zip"
-      - uses: actions/upload-artifact@v7
+          cargo +stable test --manifest-path rust/Cargo.toml --release --locked --target "$TARGET"
+          cargo +stable build --manifest-path rust/Cargo.toml --release --locked --target "$TARGET"
+      - name: Prepare native download
+        run: python tools/release.py binary --binary "rust/target/$TARGET/release/$BINARY" --platform "$PLATFORM" --notices "$RUNNER_TEMP/core-notices" --output dist
+      - name: Test executable and documentation from the extracted archive
+        run: python tools/release.py verify "dist/painter-$VERSION-$PLATFORM.$ARCHIVE" --smoke
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: package-${{ matrix.platform }}
           path: |
@@ -154,48 +153,59 @@ jobs:
             dist/*.zip
           if-no-files-found: error
 
-  release:
-    needs: [prepare, build]
+  assemble:
+    needs: [prepare, checks, source, build]
     runs-on: ubuntu-22.04
-    permissions:
-      contents: write
+    env:
+      VERSION: ${{ needs.prepare.outputs.version }}
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.commit }}
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: package-*
           path: dist
           merge-multiple: true
-      - name: Generate checksums
-        working-directory: dist
-        run: sha256sum ./*.tar.gz ./*.zip > SHA256SUMS
-      - uses: actions/upload-artifact@v7
+      - name: Validate complete download set and create checksums
+        run: python tools/release.py checksums --directory dist --version "$VERSION"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-downloads
           path: dist/*
           if-no-files-found: error
-      # Publish only after every platform succeeds; manual trial builds keep artifacts only.
-      - name: Publish release
-        if: needs.prepare.outputs.tag != ''
+
+  publish:
+    if: github.event_name == 'workflow_dispatch' && inputs.publish && needs.prepare.outputs.tag != ''
+    needs: [prepare, checks, source, build, assemble]
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          ref: ${{ needs.prepare.outputs.commit }}
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: release-downloads
+          path: dist
+      - name: Publish explicitly requested preview release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.prepare.outputs.tag }}
+          EXPECTED_COMMIT: ${{ needs.prepare.outputs.commit }}
         run: |
-          cat > /tmp/release-notes.md <<'EOF'
-          Pixel Painter creates editable RGBA canvases, previews pixel art in a terminal, and exports PNGs.
-
-          Download the archive for Linux x86_64, Windows x86_64, Apple Silicon Mac, or Intel Mac. Extract it and run `./painter --help` (Windows PowerShell: `.\painter.exe --help`). Rust is not required.
-
-          All four platforms passed native release-mode tests plus CLI help, soccer-ball preview, and PNG-export checks. Hands-on testing on Windows and Mac devices is still welcome. Builds are unsigned and not notarized.
-
-          Examples, matching source with dependencies, and SHA256 checksums are included. Licensed GPL-3.0-only.
-          EOF
-          if gh release view "$TAG" --json isDraft --jq .isDraft > /tmp/release-is-draft; then
-            # Resume an existing draft, but never replace an already-published release.
-            test "$(cat /tmp/release-is-draft)" = true
-            gh release upload "$TAG" dist/* --clobber
-            gh release edit "$TAG" --notes-file /tmp/release-notes.md --draft=false
+          test "$(gh api "repos/$GH_REPO/commits/$TAG" --jq .sha)" = "$EXPECTED_COMMIT"
+          if gh release view "$TAG" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-is-draft"; then
+            test "$(cat "$RUNNER_TEMP/release-is-draft")" = true
           else
-            gh release create "$TAG" dist/* --verify-tag \
-              --title "$TAG" --notes-file /tmp/release-notes.md
+            gh release create "$TAG" --verify-tag --draft --prerelease --title "$TAG preview" --notes-file CHANGELOG.md
           fi
+          gh release upload "$TAG" dist/* --clobber
+          gh release edit "$TAG" --notes-file CHANGELOG.md --draft=false --prerelease

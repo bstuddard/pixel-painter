@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "colors": {
+    "edge": "#35664D",
+    "grass": "#4E8052",
+    "grass_light": "#72A15D",
+    "grass_dark": "#416D4D",
+    "stone": "#87918A",
+    "stone_light": "#ACB4A0",
+    "water": "#3A8193",
+    "water_light": "#68AFAD"
+  }
+}

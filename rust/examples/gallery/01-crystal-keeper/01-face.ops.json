@@ -1,0 +1,79 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "ellipse",
+      "x": 17,
+      "y": 14,
+      "width": 14,
+      "height": 13,
+      "color": "#18243C",
+      "fill": true
+    },
+    {
+      "op": "ellipse",
+      "x": 19,
+      "y": 16,
+      "width": 10,
+      "height": 8,
+      "color": "#D0A186",
+      "fill": true
+    },
+    {
+      "op": "fill_rect",
+      "x": 20,
+      "y": 17,
+      "width": 8,
+      "height": 3,
+      "color": "#EDC7A0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 20,
+      "y": 20,
+      "width": 2,
+      "height": 2,
+      "color": "#18243C"
+    },
+    {
+      "op": "fill_rect",
+      "x": 26,
+      "y": 20,
+      "width": 2,
+      "height": 2,
+      "color": "#18243C"
+    },
+    {
+      "op": "fill_rect",
+      "x": 23,
+      "y": 23,
+      "width": 3,
+      "height": 1,
+      "color": "#8D626C"
+    },
+    {
+      "op": "fill_rect",
+      "x": 16,
+      "y": 24,
+      "width": 16,
+      "height": 3,
+      "color": "#929ED0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 18,
+      "y": 26,
+      "width": 12,
+      "height": 2,
+      "color": "#5864A0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 19,
+      "y": 28,
+      "width": 3,
+      "height": 3,
+      "color": "#929ED0"
+    }
+  ]
+}
