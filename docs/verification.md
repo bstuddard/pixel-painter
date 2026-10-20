@@ -19,14 +19,17 @@ cargo test --manifest-path rust/Cargo.toml --release --no-default-features --loc
 RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path rust/Cargo.toml --no-deps --locked
 ```
 
-The default configuration passes 117 unit/integration tests and one doctest in
-debug and release. Disabling the default `cli` feature passes 82 library and
-integration tests plus one doctest in both profiles; its dependency graph omits
+The default configuration passes 161 tests, including the doctest, in debug and
+release. Disabling the default `cli` feature passes 121 tests, including the
+doctest, in both profiles; its dependency graph omits
 Clap. Both feature configurations also pass on Rust 1.88.0. CI repeats the core
 checks on each candidate, including both feature configurations of the packaged crate.
 
 Tests exercise these contracts:
 
+- [Coherent authoring](../rust/tests/authoring.rs): typed recipes, transformed
+  components, shadows, exact scene pixels, preview limits, stable animation-sheet
+  ordering, placement/split exports, pack integrity, and transactional failures.
 - [Core operations](../rust/tests/core.rs): exact pixels, alpha rounding, clipping,
   transforms, palettes, aggregate work limits, transactional rollback, projects,
   layers/frames/tags, PNG formats, atlas/APNG timing, seams, and deterministic seeds.
@@ -58,12 +61,30 @@ Clippy, and its exported-manifest/timing test on stable Rust and Rust 1.88.0.
 Its graphical smoke test rendered three frames under a temporary Xvfb display
 with software OpenGL and exited successfully. It does not link the painter library.
 
+The Village Corner generator also reproduces all 148 artifact hashes. Together,
+the two generators verify 268 artifacts, including editable inputs and encoded
+exports. The final preview optimizations preserve both checksum manifests.
+
+## Preview performance
+
+A Linux release-build comparison used three runs of each case, reporting medians.
+A contact sheet containing one opaque 4096×4096 image, one column, zero padding,
+and scale 1 was rendered five times. Removing the redundant output clone reduced
+peak process RSS from 198,716 KiB to 133,236 KiB (about 64 MiB) and elapsed time
+from 0.597 s to 0.510 s. This measures input, output, and process overhead together.
+
+A separate case rendered 200 animation sheets from 256 one-pixel frames and 256
+tags, each referencing every frame. Tracking visited frames directly reduced the
+median from 0.348 s to 0.0115 s. Document construction was outside the timer.
+These cases measure the changed paths, not representative end-to-end workloads
+or a performance guarantee. Pixel and frame-order regressions run in the suite.
+
 ## Packaging and security
 
 The [release preparation guide](release-review.md) gives the full packaging
 commands and publication gates. Local checks cover:
 
-- All 18 release-tool tests, Ruff formatting/linting, workflow validation with
+- All 20 release-tool tests, Ruff formatting/linting, workflow validation with
   actionlint, local Markdown links, and `git diff --check`.
 - Standalone `cargo package` verification and tests of the extracted crate.
 - An isolated clean source snapshot with both dependency graphs vendored. Its

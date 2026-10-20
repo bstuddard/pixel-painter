@@ -1,6 +1,6 @@
 # Security review
 
-Reviewed on Linux on 2026-10-19. The intended use is a local CLI/library running
+Reviewed on Linux on 2026-10-20. The intended use is a local CLI/library running
 as an ordinary user in a directory they control. Artwork contents may be untrusted;
 command-line paths and the surrounding directory are selected by the caller.
 This source review, regression testing, and advisory scan are not a penetration
@@ -105,7 +105,7 @@ UTF-8 write boundary, and exact JSON string round trips. Both gallery checksum
 manifests verify after regeneration. The refreshed advisory database reports a clean
 core audit and the same two unresolved consumer notices listed below.
 
-Final Rust verification passed 158 CLI/default-feature tests and 118 library-only
+Final Rust verification passed 161 CLI/default-feature tests and 121 library-only
 tests in debug/release and on Rust 1.88. Clippy passed with warnings denied locally
 and for Windows x86_64 and both Mac architectures, with/without the CLI. Rustdoc,
 formatting, and local links passed. Both example generators reproduce their 268
@@ -116,6 +116,12 @@ Two final correctness fixes validate resolved attachment maps after inheritance
 and exclude motion-exempt poses from animation proportion references. Regressions
 cover failure before publication, the valid 32-name boundary, and genuine drift
 following an exempt first pose.
+
+Preview requests now reject invalid scales before source loading and reject
+oversized scaled scene/contact-sheet dimensions before raster allocation or
+composition. Unscaled previews transfer their canvas instead of cloning it.
+Regression tests cover zero/oversized scales, dimension overflow, pixel limits,
+native/scaled pixel identity, and animation ordering with overlapping tags.
 
 The final packaging review also reproduced ignored local `.env` files and caches
 entering binary downloads through a working-directory copy. Release packaging now

@@ -3,6 +3,7 @@
 
 use painter::{
     Canvas, Document, Pixel,
+    animation::Tag,
     assets::{self, AssetRoot},
     atlas::{Atlas, Options},
     drawing::Point,
@@ -267,6 +268,116 @@ fn offline_scene_order_anchors_and_transparency_are_exact() {
             .height(),
         8
     );
+}
+#[test]
+fn preview_limits_are_checked_before_loading_scene_sources() {
+    let directory = tempfile::tempdir().unwrap();
+    let root = AssetRoot::new(directory.path()).unwrap();
+    let mut scene = Scene {
+        version: 1,
+        width: 1,
+        height: 1,
+        background: Pixel::TRANSPARENT,
+        tile: None,
+        y_sort: false,
+        assets: vec![entry("missing", "missing.png", 0)],
+    };
+    for scale in [0, 65, u32::MAX] {
+        assert_eq!(
+            scene.render(&root, scale).unwrap_err().code,
+            painter::ErrorCode::InvalidInput
+        );
+        assert_eq!(
+            scene.contact_sheet(&root, None, 0, scale).unwrap_err().code,
+            painter::ErrorCode::InvalidInput
+        );
+    }
+    for (width, height, scale) in [
+        (0, 1, 1),
+        (u32::MAX, 1, 64),
+        (1, u32::MAX, 64),
+        (4096, 4096, 2),
+    ] {
+        scene.width = width;
+        scene.height = height;
+        assert_eq!(
+            scene.render(&root, scale).unwrap_err().code,
+            painter::ErrorCode::ResourceLimit
+        );
+    }
+}
+#[test]
+fn contact_sheets_preserve_padding_and_nearest_neighbor_pixels() {
+    let images = [Canvas::from_pixels(2, 1, vec![RED, GREEN]).unwrap()];
+    let native = painter::scene::contact_sheet(&images, Some(1), 1, BLUE, 1).unwrap();
+    assert_eq!((native.width(), native.height()), (4, 3));
+    assert_eq!(native.pixel(1, 1), Some(RED));
+    assert_eq!(native.pixel(2, 1), Some(GREEN));
+    assert_eq!(native.pixel(0, 0), Some(BLUE));
+    for scale in [2, 64] {
+        let scaled = painter::scene::contact_sheet(&images, Some(1), 1, BLUE, scale).unwrap();
+        assert_eq!((scaled.width(), scaled.height()), (4 * scale, 3 * scale));
+        for y in 0..scaled.height() {
+            for x in 0..scaled.width() {
+                assert_eq!(scaled.pixel(x, y), native.pixel(x / scale, y / scale));
+            }
+        }
+    }
+    for (padding, scale, code) in [
+        (1, 0, painter::ErrorCode::InvalidInput),
+        (1, 65, painter::ErrorCode::InvalidInput),
+        (1024, 64, painter::ErrorCode::ResourceLimit),
+    ] {
+        assert_eq!(
+            painter::scene::contact_sheet(&images, Some(1), padding, BLUE, scale)
+                .unwrap_err()
+                .code,
+            code
+        );
+    }
+}
+#[test]
+fn animation_sheets_keep_first_tag_appearances_and_append_untagged_frames() {
+    let white = Pixel::rgba(255, 255, 255, 255);
+    let mut document =
+        Document::from_canvas(Canvas::from_pixels(1, 1, vec![RED]).unwrap()).unwrap();
+    for (index, color) in [GREEN, BLUE, white].into_iter().enumerate() {
+        document
+            .add_frame(format!("frame-{}", index + 1), None, 100)
+            .unwrap();
+        document
+            .edit(&Batch::new(vec![painter::operations::Operation::Clear {
+                color: Some(Color::Rgba(color)),
+            }]))
+            .unwrap();
+    }
+    for (name, frames) in [("a", vec![2, 0, 2]), ("b", vec![0, 1])] {
+        document
+            .set_tag(
+                name.into(),
+                Tag {
+                    frames,
+                    direction: None,
+                },
+            )
+            .unwrap();
+    }
+    for scale in [1, 2] {
+        let sheet = painter::animation_check::contact_sheet(&document, scale).unwrap();
+        assert_eq!((sheet.width(), sheet.height()), (8 * scale, 8 * scale));
+        for ((x, y), color) in [
+            ((2, 2), BLUE),
+            ((5, 2), RED),
+            ((2, 5), GREEN),
+            ((5, 5), white),
+        ] {
+            assert_eq!(sheet.pixel(x * scale, y * scale), Some(color));
+        }
+        assert_eq!(
+            sheet.pixels().iter().filter(|pixel| pixel.a != 0).count(),
+            4 * scale as usize * scale as usize
+        );
+    }
 }
 #[test]
 fn asset_references_reject_traversal_absolute_paths_and_platform_prefixes() {

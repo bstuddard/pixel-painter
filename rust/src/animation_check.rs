@@ -119,16 +119,20 @@ pub fn check(
     Ok(report)
 }
 pub fn contact_sheet(document: &Document, scale: u32) -> Result<Canvas> {
-    let mut indices = Vec::new();
+    crate::scene::validate_preview_scale(scale)?;
+    let mut seen = vec![false; document.frames().len()];
+    let mut indices = Vec::with_capacity(seen.len());
+    // Tags may repeat or share frames. Keep first appearances, then untagged frames.
     for tag in document.tags().values() {
         for index in &tag.frames {
-            if !indices.contains(index) {
+            if !seen[*index] {
+                seen[*index] = true;
                 indices.push(*index);
             }
         }
     }
-    for index in 0..document.frames().len() {
-        if !indices.contains(&index) {
+    for (index, seen) in seen.into_iter().enumerate() {
+        if !seen {
             indices.push(index);
         }
     }

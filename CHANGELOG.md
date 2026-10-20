@@ -14,6 +14,10 @@
   examples/docs from the committed Git tree, shared with source packaging.
 - Kept generated pack references in portable forward-slash form on Windows,
   including placement paths and recursive export validation.
+- Eliminated full-canvas copies for unscaled previews and repeated frame-list
+  scans in animation contact sheets; preserved pixel output and frame ordering.
+  Preview scale/dimensions are checked before rendering. The `scene::scaled`
+  helper is now internal; use `drawing::resize` for standalone resizing.
 - Enforced attachment limits after frame overrides merge, before exporting files;
   excluded motion-exempt poses from animation proportion references.
 

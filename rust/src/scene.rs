@@ -90,7 +90,6 @@ impl Scene {
                     .frames
                     .get(entry.frame)
                     .ok_or_else(|| Error::invalid("placement frame is missing"))?;
-                frame.anchors.validate()?;
                 anchor = anchor.or(frame.anchors.ground);
                 if let Some(id) = &entry.part {
                     let part = metadata
@@ -170,6 +169,7 @@ impl Scene {
         Ok(loaded)
     }
     pub fn render(&self, root: &AssetRoot, scale: u32) -> Result<Canvas> {
+        preview_dimensions(self.width, self.height, scale)?;
         let mut canvas = Canvas::new(self.width, self.height)?;
         let mut budget = Budget::default();
         let mut assets = self.load(root, &mut budget)?;
@@ -203,7 +203,7 @@ impl Scene {
                 .ok_or_else(|| Error::limit("scene y overflow"))?;
             drawing::paste(&mut canvas, &asset.canvas, x, y, true)?;
         }
-        scaled(&canvas, scale)
+        scaled(canvas, scale)
     }
     pub fn contact_sheet(
         &self,
@@ -212,6 +212,7 @@ impl Scene {
         padding: u32,
         scale: u32,
     ) -> Result<Canvas> {
+        validate_preview_scale(scale)?;
         let assets = self.load(root, &mut Budget::default())?;
         contact_sheet(
             &assets.into_iter().map(|a| a.canvas).collect::<Vec<_>>(),
@@ -222,24 +223,29 @@ impl Scene {
         )
     }
 }
-pub fn scaled(canvas: &Canvas, scale: u32) -> Result<Canvas> {
+pub(crate) fn validate_preview_scale(scale: u32) -> Result<()> {
     if scale == 0 || scale > 64 {
         return Err(Error::invalid("preview scale must be 1..=64"));
     }
+    Ok(())
+}
+fn preview_dimensions(width: u32, height: u32, scale: u32) -> Result<(u32, u32)> {
+    validate_preview_scale(scale)?;
+    let width = width
+        .checked_mul(scale)
+        .ok_or_else(|| Error::limit("preview width overflow"))?;
+    let height = height
+        .checked_mul(scale)
+        .ok_or_else(|| Error::limit("preview height overflow"))?;
+    Canvas::pixel_count(width, height)?;
+    Ok((width, height))
+}
+fn scaled(canvas: Canvas, scale: u32) -> Result<Canvas> {
     if scale == 1 {
-        return Ok(canvas.clone());
+        return Ok(canvas);
     }
-    drawing::resize(
-        canvas,
-        canvas
-            .width()
-            .checked_mul(scale)
-            .ok_or_else(|| Error::limit("preview width overflow"))?,
-        canvas
-            .height()
-            .checked_mul(scale)
-            .ok_or_else(|| Error::limit("preview height overflow"))?,
-    )
+    let (width, height) = preview_dimensions(canvas.width(), canvas.height(), scale)?;
+    drawing::resize(&canvas, width, height)
 }
 pub fn contact_sheet(
     images: &[Canvas],
@@ -267,7 +273,10 @@ pub fn contact_sheet(
         )
         .map_err(|_| Error::limit("contact sheet dimensions overflow"))
     };
-    let mut output = Canvas::new(extent(columns, width)?, extent(rows, height)?)?;
+    let output_width = extent(columns, width)?;
+    let output_height = extent(rows, height)?;
+    preview_dimensions(output_width, output_height, scale)?;
+    let mut output = Canvas::new(output_width, output_height)?;
     output.pixels_mut().fill(background);
     for (index, image) in images.iter().enumerate() {
         let x = padding + (index as u32 % columns) * (width + padding);
@@ -283,5 +292,5 @@ pub fn contact_sheet(
             }
         }
     }
-    scaled(&output, scale)
+    scaled(output, scale)
 }
