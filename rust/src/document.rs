@@ -6,6 +6,7 @@ use crate::{
     animation::{Frame, Tag},
     canvas::MAX_PIXELS,
     drawing::{self, Point},
+    maps::{self, Channel},
     operations::{Batch, Summary},
 };
 use serde::{Deserialize, Serialize};
@@ -17,6 +18,8 @@ pub struct Layer {
     pub name: String,
     pub visible: bool,
     pub opacity: u8,
+    #[serde(default, skip_serializing_if = "Channel::is_color")]
+    pub channel: Channel,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -91,6 +94,7 @@ impl Document {
                 name: "base".into(),
                 visible: true,
                 opacity: 255,
+                channel: Channel::Color,
             }],
             frames: vec![Frame {
                 name: "frame-0".into(),
@@ -184,6 +188,11 @@ impl Document {
                     "all frames require one equal-sized cel per layer",
                 ));
             }
+            for (layer, cel) in self.layers.iter().zip(&frame.cels) {
+                if layer.channel == Channel::Normal {
+                    maps::validate_normals(cel)?;
+                }
+            }
         }
         if self.tags.len() > 256 {
             return Err(Error::limit("project exceeds 256 tags"));
@@ -230,8 +239,12 @@ impl Document {
     }
 
     pub fn edit(&mut self, batch: &Batch) -> Result<Summary> {
-        let (cel, summary) =
-            batch.render(&self.frames[self.active_frame].cels[self.active_layer])?;
+        let mut remaining = drawing::MAX_WORK;
+        let (cel, summary) = batch.render_channel(
+            &self.frames[self.active_frame].cels[self.active_layer],
+            self.layers[self.active_layer].channel,
+            &mut remaining,
+        )?;
         if cel.width() != self.width || cel.height() != self.height {
             return Err(Error::invalid(
                 "cel edits cannot change project dimensions; transform flat canvases or use project resize",
@@ -241,27 +254,122 @@ impl Document {
         Ok(summary)
     }
 
+    /// Draw geometry and optional face normals atomically under one raster budget.
+    /// Outlines inherit their owning face direction; later manual map edits win.
+    pub fn draw_shape(
+        &mut self,
+        shape: &crate::geometry::Shape,
+        normal_layer: Option<&str>,
+        palette: Option<&crate::palette::Palette>,
+    ) -> Result<()> {
+        if self.layers[self.active_layer].channel != Channel::Color {
+            return Err(Error::invalid("geometry requires an active color layer"));
+        }
+        let Some(name) = normal_layer else {
+            let mut batch = Batch::new(shape.operations()?);
+            batch.palette = palette.cloned();
+            self.edit(&batch)?;
+            return Ok(());
+        };
+        let normal_index = self.layer_index(name)?;
+        if self.layers[normal_index].channel != Channel::Normal {
+            return Err(Error::invalid(
+                "geometry normal target must be a normal layer",
+            ));
+        }
+        let (color, normal) = shape.paired_operations(palette)?;
+        let mut color = Batch::new(color);
+        color.palette = palette.cloned();
+        let normal = Batch::new(normal);
+        let mut remaining = drawing::MAX_WORK;
+        let (color, _) = color.render_channel(
+            &self.frames[self.active_frame].cels[self.active_layer],
+            Channel::Color,
+            &mut remaining,
+        )?;
+        let (normal, _) = normal.render_channel(
+            &self.frames[self.active_frame].cels[normal_index],
+            Channel::Normal,
+            &mut remaining,
+        )?;
+        self.frames[self.active_frame].cels[self.active_layer] = color;
+        self.frames[self.active_frame].cels[normal_index] = normal;
+        Ok(())
+    }
+
     /// Composite bottom to top over transparent pixels using each layer's opacity.
     pub fn flatten(&self, index: usize) -> Result<Canvas> {
+        self.composite_layers(index, Channel::Color, None)
+    }
+
+    pub(crate) fn composite_layers(
+        &self,
+        index: usize,
+        channel: Channel,
+        selection: Option<&[usize]>,
+    ) -> Result<Canvas> {
         let frame = self
             .frames
             .get(index)
             .ok_or_else(|| Error::new(ErrorCode::OutOfBounds, "frame index is outside project"))?;
         let mut result = Canvas::new(self.width, self.height)?;
-        for (layer, cel) in self
-            .layers
-            .iter()
-            .zip(&frame.cels)
-            .filter(|(l, _)| l.visible)
+        for (layer, cel) in
+            self.layers
+                .iter()
+                .zip(&frame.cels)
+                .enumerate()
+                .filter_map(|(i, (layer, cel))| {
+                    (layer.visible
+                        && layer.channel == channel
+                        && selection.is_none_or(|s| s.contains(&i)))
+                    .then_some((layer, cel))
+                })
         {
             for (target, source) in result.pixels_mut().iter_mut().zip(cel.pixels()) {
-                *target = source.over(*target, layer.opacity);
+                *target = channel.composite(*source, *target, layer.opacity);
             }
         }
         Ok(result)
     }
 
+    /// Render one semantic channel. Companion coverage is clipped to visible color.
+    pub fn render_channel(&self, index: usize, channel: Channel) -> Result<Canvas> {
+        let color = self.flatten(index)?;
+        if channel == Channel::Color {
+            return Ok(color);
+        }
+        self.render_map(index, channel, &color)
+    }
+
+    pub(crate) fn render_map(
+        &self,
+        index: usize,
+        channel: Channel,
+        color: &Canvas,
+    ) -> Result<Canvas> {
+        let mut map = self.composite_layers(index, channel, None)?;
+        for (target, coverage) in map.pixels_mut().iter_mut().zip(color.pixels()) {
+            if coverage.a == 0 {
+                *target = crate::Pixel::TRANSPARENT;
+            } else if channel == Channel::Normal {
+                if target.a == 0 {
+                    *target = maps::FLAT_NORMAL;
+                }
+                target.a = coverage.a;
+            } else {
+                target.a = ((u16::from(target.a) * u16::from(coverage.a) + 127) / 255) as u8;
+                if target.a == 0 {
+                    *target = crate::Pixel::TRANSPARENT;
+                }
+            }
+        }
+        Ok(map)
+    }
+
     pub fn add_layer(&mut self, name: String) -> Result<()> {
+        self.add_layer_with_channel(name, Channel::Color)
+    }
+    pub fn add_layer_with_channel(&mut self, name: String, channel: Channel) -> Result<()> {
         name_valid(&name)?;
         if self.layers.iter().any(|l| l.name == name) {
             return Err(Error::invalid("duplicate layer name"));
@@ -275,6 +383,7 @@ impl Document {
             name,
             visible: true,
             opacity: 255,
+            channel,
         });
         self.active_layer = self.layers.len() - 1;
         Ok(())
@@ -282,10 +391,11 @@ impl Document {
 
     pub fn duplicate_layer(&mut self, name: &str, new_name: String) -> Result<()> {
         let source = self.layer_index(name)?;
-        self.add_layer(new_name)?;
+        let mut layer = self.layers[source].clone();
+        layer.name = new_name.clone();
+        self.add_layer_with_channel(new_name, layer.channel)?;
         let target = self.active_layer;
-        self.layers[target].visible = self.layers[source].visible;
-        self.layers[target].opacity = self.layers[source].opacity;
+        self.layers[target] = layer;
         for frame in &mut self.frames {
             frame.cels[target] = frame.cels[source].clone();
         }
@@ -339,12 +449,21 @@ impl Document {
         Ok(())
     }
     pub fn merge_layer(&mut self, name: &str) -> Result<()> {
+        let index = self.layer_index(name)?;
+        let channel = self.layers[index].channel;
+        if index == 0 || self.layers[index - 1].channel != channel {
+            return Err(Error::invalid(
+                "merge requires an adjacent lower layer in the same channel",
+            ));
+        }
         let mut merged = self.clone();
         merged.merge_layer_inner(name)?;
         // Integer source-over is not perfectly associative. Never silently change
         // the visible pixels when an isolated pair is placed over lower layers.
         for index in 0..self.frames.len() {
-            if self.flatten(index)? != merged.flatten(index)? {
+            if self.composite_layers(index, channel, None)?
+                != merged.composite_layers(index, channel, None)?
+            {
                 return Err(Error::new(
                     ErrorCode::MergeChangesComposite,
                     "byte rounding would change the composite over lower layers; keep these layers separate",
@@ -364,6 +483,11 @@ impl Document {
         }
         let lower = self.layers[index - 1].clone();
         let upper = self.layers[index].clone();
+        if lower.channel != upper.channel {
+            return Err(Error::invalid(
+                "cannot merge layers from different channels",
+            ));
+        }
         for frame in &mut self.frames {
             let mut merged = Canvas::new(self.width, self.height)?;
             for (layer, cel) in [
@@ -372,7 +496,7 @@ impl Document {
             ] {
                 if layer.visible {
                     for (target, source) in merged.pixels_mut().iter_mut().zip(cel.pixels()) {
-                        *target = source.over(*target, layer.opacity);
+                        *target = upper.channel.composite(*source, *target, layer.opacity);
                     }
                 }
             }

@@ -1,0 +1,53 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "fill_rect",
+      "x": 15,
+      "y": 34,
+      "width": 8,
+      "height": 10,
+      "color": "#FFC875C0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 34,
+      "y": 34,
+      "width": 8,
+      "height": 10,
+      "color": "#FFC875C0"
+    },
+    {
+      "op": "fill_rect",
+      "x": 18,
+      "y": 34,
+      "width": 1,
+      "height": 10,
+      "color": "#00000000"
+    },
+    {
+      "op": "fill_rect",
+      "x": 37,
+      "y": 34,
+      "width": 1,
+      "height": 10,
+      "color": "#00000000"
+    },
+    {
+      "op": "fill_rect",
+      "x": 15,
+      "y": 39,
+      "width": 8,
+      "height": 1,
+      "color": "#00000000"
+    },
+    {
+      "op": "fill_rect",
+      "x": 34,
+      "y": 39,
+      "width": 8,
+      "height": 1,
+      "color": "#00000000"
+    }
+  ]
+}

@@ -1,0 +1,64 @@
+{
+  "version": 1,
+  "image": "sheet.png",
+  "preview": "preview.png",
+  "animation": "animation.png",
+  "width": 68,
+  "height": 34,
+  "frames": [
+    {
+      "name": "frame-0",
+      "file": "frames/0000.png",
+      "rect": {
+        "x": 1,
+        "y": 1,
+        "width": 32,
+        "height": 32
+      },
+      "duration_ms": 170,
+      "pivot": null
+    },
+    {
+      "name": "bright",
+      "file": "frames/0001.png",
+      "rect": {
+        "x": 35,
+        "y": 1,
+        "width": 32,
+        "height": 32
+      },
+      "duration_ms": 230,
+      "pivot": null
+    }
+  ],
+  "tags": {
+    "pulse": {
+      "frames": [
+        0,
+        1
+      ],
+      "direction": null
+    }
+  },
+  "maps": {
+    "emissive": {
+      "sheet": "emissive/sheet.png",
+      "frames": [
+        "emissive/frames/0000.png",
+        "emissive/frames/0001.png"
+      ],
+      "encoding": "rgba8_emission"
+    },
+    "normal": {
+      "sheet": "normal/sheet.png",
+      "frames": [
+        "normal/frames/0000.png",
+        "normal/frames/0001.png"
+      ],
+      "encoding": "xyz_unorm8",
+      "space": "screen",
+      "positive_y": "up",
+      "default": "flat"
+    }
+  }
+}

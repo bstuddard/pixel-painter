@@ -367,17 +367,28 @@ class ReleaseTests(unittest.TestCase):
             "CHANGELOG.md",
             "rust/examples/gallery/README.md",
             "rust/examples/village/README.md",
+            "rust/examples/lighting/README.md",
+            "rust/examples/lighting/nested/README.md",
             "rust/examples/village/scene.json",
         ]:
             destination = self.root / name
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_text("fixture\n", encoding="utf-8")
+        (self.root / "rust/examples/lighting/README.md").write_text(
+            "[maps](../../../docs/three-map-export.md#coverage)\n[village](../village/README.md)\n",
+            encoding="utf-8",
+        )
+        (self.root / "rust/examples/lighting/nested/README.md").write_text(
+            "[maps](../../../../docs/three-map-export.md?raw=1#coverage)\n",
+            encoding="utf-8",
+        )
         (self.root / "docs").mkdir()
         for name in [
             "cli-and-formats.md",
             "roadmap.md",
             "security-review.md",
             "coherent-assets.md",
+            "three-map-export.md",
         ]:
             (self.root / "docs" / name).write_text(
                 "[consumer](../integrations/macroquad/README.md)\n"
@@ -430,6 +441,14 @@ class ReleaseTests(unittest.TestCase):
                 self.assertIn(
                     f"/blob/{info['commit']}/integrations/macroquad/README.md",
                     (extracted / "docs/security-review.md").read_text(encoding="utf-8"),
+                )
+                self.assertIn(
+                    "../../docs/three-map-export.md#coverage",
+                    (extracted / "examples/lighting/README.md").read_text(),
+                )
+                self.assertIn(
+                    "../../../docs/three-map-export.md?raw=1#coverage",
+                    (extracted / "examples/lighting/nested/README.md").read_text(),
                 )
 
     def test_checksums_reject_missing_assets_before_writing_a_manifest(self):

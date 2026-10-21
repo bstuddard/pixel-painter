@@ -101,14 +101,14 @@ These are bounded local operations, not hard process RAM/CPU quotas.
 Regression tests exercise hidden frames/layers, malformed input accounting,
 special-file reference rejection, combined recipe exhaustion, component
 preflight, transaction rollback, staging cleanup, crafted report paths, every
-UTF-8 write boundary, and exact JSON string round trips. Both gallery checksum
+UTF-8 write boundary, and exact JSON string round trips. All example checksum
 manifests verify after regeneration. The refreshed advisory database reports a clean
 core audit and the same two unresolved consumer notices listed below.
 
-Final Rust verification passed 161 CLI/default-feature tests and 121 library-only
+Final Rust verification passed 178 CLI/default-feature tests and 135 library-only
 tests in debug/release and on Rust 1.88. Clippy passed with warnings denied locally
 and for Windows x86_64 and both Mac architectures, with/without the CLI. Rustdoc,
-formatting, and local links passed. Both example generators reproduce their 268
+formatting, and local links passed. All three example generators reproduce their 336
 artifact checksum entries. These checks are evidence for this source snapshot,
 not proof that every possible secret or defect has been detected.
 
@@ -135,7 +135,7 @@ No actual credential was found; the reproduction used synthetic local-only data.
 
 A separate scan used the official, SHA-256-verified
 [Gitleaks 8.30.1 release](https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1).
-Its embedded default rules found no secrets in all 346 tracked and nonignored
+Its embedded default rules found no secrets in all 424 tracked and nonignored
 untracked candidate files or in reachable Git history, including deleted
 content. The scan used full redaction, no project ignore list or baseline, and
 ignored inline suppression comments. A synthetic token verified detection.
@@ -152,7 +152,7 @@ every possible secret.
 
 The local scan used the official cargo-audit 0.22.2 Linux release, verified against
 its GitHub release asset SHA256, and a freshly fetched RustSec database at commit
-`999ec89d5d3f10f20be14750ec8c2d8b44e0ac9b`. It checked both complete lockfiles,
+`e6f94f3760d5e6c54c1b05f204002263bc025524`. It checked both complete lockfiles,
 without CPU/OS advisory filters or advisory ignore lists.
 
 | Package scope | Result |
@@ -215,11 +215,35 @@ model has not been implemented or tested here.
 A final local check rebuilt the latest source and Linux binary archives after the
 security fixes. Extracted Cargo packages, binary smoke tests, and vendored source
 release tests with an empty Cargo cache all passed. Native Windows/macOS execution
-still requires CI on the committed candidate.
+is checked in CI on the committed candidate.
 
 Release archives have checksums but are not publisher-signed or notarized. Checksums
 detect mismatches; authenticating the publisher requires a separate signing or
-attestation process. Hosted Windows/macOS checks and release packaging remain
-pending until their workflows run. `BUILD-INFO.json` records source and compiler
+attestation process. Each new release requires hosted native checks and a full
+packaging trial. `BUILD-INFO.json` records source and compiler
 information; it is descriptive provenance, not a cryptographic attestation. The
 crate manifest disables registry publication until an owned package name is chosen.
+
+
+## Three-map review (v0.3.0)
+
+Semantic channels use one document schema and compositor. Ordinary flattening
+selects color layers; split parts reject map-layer selections. Normal vectors
+are validated on read and after transactional edits, including hidden cels.
+Map edits reject palette quantization, and normal edits reject RGB paint blending.
+Vector flips/quarter turns preserve screen-space directions. Geometry color and
+normal cels share one work budget and commit together; a regression exhausts that
+combined budget after color alone succeeds and verifies both original cels remain.
+
+One atlas layout and a combined channel/frame pixel cap precede raster allocation.
+Companion paths use fixed channel names and numeric indices. All files stage before
+completion-marker publication, and placement checks compare companion pixels too.
+Asset packs retain their map requests and regenerate/compare every companion.
+The usual controlled-directory and concurrent-writer limitations still apply.
+
+The separate consumer uses only embedded fixtures and fixed shader sources. Lit
+assets retain every GPU texture handle for the material's full lifetime; shader
+samplers alone retain raw IDs. Readback tests compare 70 samples against the CPU
+reference across both assets, all modes, flips, fallback samplers, and partial
+coverage. This does not repair or change the upstream Macroquad advisories above.
+No dependency was added to either package.

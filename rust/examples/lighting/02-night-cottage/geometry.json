@@ -1,0 +1,21 @@
+{
+  "shape": "cottage",
+  "x": 9,
+  "y": 52,
+  "width": 39,
+  "height": 26,
+  "depth": 8,
+  "roof_height": 16,
+  "faces": {
+    "top": "#D6BFA0",
+    "front": "#A78872",
+    "side": "#6C676B",
+    "outline": "#1D2739"
+  },
+  "roof": {
+    "top": "#5C7595",
+    "front": "#405976",
+    "side": "#2D3D58",
+    "outline": "#182336"
+  }
+}

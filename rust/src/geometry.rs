@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: GPL-3.0-only
 //! Pixel-aligned face assemblies compiled to ordinary transactional operations.
 
-use crate::{Error, Result, drawing::Point, operations::Operation, palette::Color};
+use crate::{
+    Error, Pixel, Result,
+    drawing::Point,
+    operations::Operation,
+    palette::{Color, Palette},
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -60,29 +65,91 @@ fn point(x: i64, y: i64) -> Result<Point> {
     point.validate()?;
     Ok(point)
 }
+struct Face {
+    points: Vec<Point>,
+    color: Color,
+    outline: Option<Color>,
+    normal: Pixel,
+}
+impl Face {
+    fn append(
+        &self,
+        output: &mut Vec<Operation>,
+        normal: bool,
+        palette: Option<&Palette>,
+    ) -> Result<()> {
+        let color = |value: &Color| -> Result<Color> {
+            if normal {
+                Ok(Color::Rgba(Pixel {
+                    a: value.resolve(palette)?.a,
+                    ..self.normal
+                }))
+            } else {
+                Ok(value.clone())
+            }
+        };
+        output.push(Operation::Polygon {
+            points: self.points.clone(),
+            color: color(&self.color)?,
+            fill: true,
+            over: false,
+        });
+        if let Some(outline) = &self.outline {
+            output.push(Operation::Polygon {
+                points: self.points.clone(),
+                color: color(outline)?,
+                fill: false,
+                over: false,
+            });
+        }
+        Ok(())
+    }
+}
 fn face(
     points: Vec<Point>,
     color: Color,
     outline: &Option<Color>,
-    operations: &mut Vec<Operation>,
+    normal: Pixel,
+    faces: &mut Vec<Face>,
 ) {
-    operations.push(Operation::Polygon {
-        points: points.clone(),
+    faces.push(Face {
+        points,
         color,
-        fill: true,
-        over: false,
+        outline: outline.clone(),
+        normal,
     });
-    if let Some(color) = outline {
-        operations.push(Operation::Polygon {
-            points,
-            color: color.clone(),
-            fill: false,
-            over: false,
-        });
-    }
 }
 impl Shape {
     pub fn operations(&self) -> Result<Vec<Operation>> {
+        let mut operations = Vec::new();
+        for face in self.faces()? {
+            face.append(&mut operations, false, None)?;
+        }
+        Ok(operations)
+    }
+
+    /// Stylized face directions, rasterized with the exact color masks and order.
+    pub fn normal_operations(&self, palette: Option<&Palette>) -> Result<Vec<Operation>> {
+        let mut operations = Vec::new();
+        for face in self.faces()? {
+            face.append(&mut operations, true, palette)?;
+        }
+        Ok(operations)
+    }
+
+    pub(crate) fn paired_operations(
+        &self,
+        palette: Option<&Palette>,
+    ) -> Result<(Vec<Operation>, Vec<Operation>)> {
+        let (mut color, mut normal) = (Vec::new(), Vec::new());
+        for face in self.faces()? {
+            face.append(&mut color, false, None)?;
+            face.append(&mut normal, true, palette)?;
+        }
+        Ok((color, normal))
+    }
+
+    fn faces(&self) -> Result<Vec<Face>> {
         let mut operations = Vec::new();
         match self {
             Self::Cottage {
@@ -105,7 +172,7 @@ impl Shape {
                         depth: *depth,
                         faces: faces.clone(),
                     }
-                    .operations()?,
+                    .faces()?,
                 );
                 let eave = point(i64::from(top.x) - 2, i64::from(top.y))?;
                 operations.extend(
@@ -119,7 +186,7 @@ impl Shape {
                         depth: *depth,
                         faces: roof.clone(),
                     }
-                    .operations()?,
+                    .faces()?,
                 );
             }
             Self::Prism {
@@ -170,12 +237,14 @@ impl Shape {
                         ],
                         faces.top.clone(),
                         &faces.outline,
+                        Pixel::rgba(64, 218, 191, 255),
                         &mut operations,
                     );
                     face(
                         vec![left, ridge, right],
                         faces.front.clone(),
                         &faces.outline,
+                        crate::maps::FLAT_NORMAL,
                         &mut operations,
                     );
                     face(
@@ -187,6 +256,7 @@ impl Shape {
                         ],
                         faces.top.clone(),
                         &faces.outline,
+                        Pixel::rgba(191, 218, 191, 255),
                         &mut operations,
                     );
                     face(
@@ -198,6 +268,7 @@ impl Shape {
                         ],
                         faces.side.clone(),
                         &faces.outline,
+                        Pixel::rgba(218, 128, 218, 255),
                         &mut operations,
                     );
                 } else {
@@ -211,18 +282,21 @@ impl Shape {
                         vec![a, point(x + d, y - d)?, point(x + w + d, y - d)?, b],
                         faces.top.clone(),
                         &faces.outline,
+                        Pixel::rgba(128, 218, 218, 255),
                         &mut operations,
                     );
                     face(
                         vec![b, point(x + w + d, y - d)?, point(x + w + d, y + h - d)?, c],
                         faces.side.clone(),
                         &faces.outline,
+                        Pixel::rgba(218, 128, 218, 255),
                         &mut operations,
                     );
                     face(
                         vec![a, b, c, e],
                         faces.front.clone(),
                         &faces.outline,
+                        crate::maps::FLAT_NORMAL,
                         &mut operations,
                     );
                 }
@@ -253,7 +327,7 @@ impl Shape {
                             depth: *depth,
                             faces: faces.clone(),
                         }
-                        .operations()?,
+                        .faces()?,
                     );
                 }
             }

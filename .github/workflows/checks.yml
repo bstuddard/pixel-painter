@@ -93,6 +93,9 @@ jobs:
       - name: Draw exported character in Macroquad
         if: runner.os == 'Linux'
         run: xvfb-run -a cargo +stable run --manifest-path integrations/macroquad/Cargo.toml --locked -- --smoke-test
+      - name: Check map lighting, vector flips, and alpha against GPU pixels
+        if: runner.os == 'Linux'
+        run: xvfb-run -a cargo +stable run --manifest-path integrations/macroquad/Cargo.toml --locked -- --smoke-test --lighting
 
   gallery:
     runs-on: ubuntu-latest
@@ -115,6 +118,13 @@ jobs:
           diff rust/examples/village/SHA256SUMS "$RUNNER_TEMP/village/SHA256SUMS"
       - name: Verify village artifact hashes
         working-directory: rust/examples/village
+        run: sha256sum --check SHA256SUMS
+      - name: Reproduce three-map lighting examples
+        run: |
+          python3 rust/examples/generate_lighting.py --painter rust/target/release/painter --output "$RUNNER_TEMP/lighting"
+          diff rust/examples/lighting/SHA256SUMS "$RUNNER_TEMP/lighting/SHA256SUMS"
+      - name: Verify lighting artifact hashes
+        working-directory: rust/examples/lighting
         run: sha256sum --check SHA256SUMS
       - name: Verify checked-in artifact hashes
         working-directory: rust/examples/gallery

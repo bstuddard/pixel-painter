@@ -5,6 +5,7 @@ use crate::{
     Document, Error, ErrorCode, Pixel, Result,
     assets::{AssetRoot, Budget, join_reference},
     atlas::{Atlas, Options},
+    maps::MapRequest,
     placement::Placement,
     recipe::{Parameters, Recipe as AssetRecipe},
     storage,
@@ -41,6 +42,8 @@ pub struct Asset {
     pub source: Source,
     #[serde(default)]
     pub placement: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "MapRequest::is_empty")]
+    pub maps: MapRequest,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -63,6 +66,8 @@ pub struct ExportAsset {
     pub frames: usize,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub placement: Option<PathBuf>,
+    #[serde(default, skip_serializing_if = "MapRequest::is_empty")]
+    pub maps: MapRequest,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -177,7 +182,7 @@ impl Recipe {
             if let (Some(placement), Some(path)) = (&placement, &placement_file) {
                 storage::write_json(&stage.path().join(path), placement, true)?;
             }
-            let atlas = Atlas::from_document(&document, Options::default())?;
+            let atlas = Atlas::from_document_with_maps(&document, Options::default(), asset.maps)?;
             let output = stage.path().join(&directory).join("export");
             if let Some(placement) = &placement {
                 atlas.export_with_placement(&output, 1, &document, placement)?;
@@ -192,6 +197,7 @@ impl Recipe {
                 height: document.height(),
                 frames: document.frames().len(),
                 placement: placement_file,
+                maps: asset.maps,
             });
         }
         if !report.valid {
@@ -277,7 +283,7 @@ pub fn check(directory: &Path, profile: Option<&Profile>) -> Result<Report> {
                 .as_ref()
                 .map(|path| budget.config::<Placement>(&root.resolve(path)?))
                 .transpose()?;
-            let atlas = Atlas::from_document(&document, Options::default())?;
+            let atlas = Atlas::from_document_with_maps(&document, Options::default(), asset.maps)?;
             let expected = stage.path().join(format!("{index:04}"));
             if let Some(placement) = &placement {
                 atlas.export_with_placement(&expected, 1, &document, placement)?;

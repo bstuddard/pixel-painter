@@ -342,6 +342,16 @@ pub struct Packing {
 
 #[derive(Subcommand)]
 pub enum ProjectCommand {
+    /// Draw procedural faces and optionally their aligned normal vectors.
+    Geometry {
+        path: PathBuf,
+        #[arg(long)]
+        input: PathBuf,
+        #[arg(long)]
+        normal_layer: Option<String>,
+        #[arg(long)]
+        palette: Option<PathBuf>,
+    },
     New {
         path: PathBuf,
         #[arg(long, default_value_t = 32)]
@@ -362,6 +372,9 @@ pub enum ProjectCommand {
         packing: Packing,
         #[arg(long)]
         placement: Option<PathBuf>,
+        /// Comma-separated companion textures: emissive,normal.
+        #[arg(long, default_value = "", value_name = "CHANNELS")]
+        maps: painter::maps::MapRequest,
     },
     Resize {
         path: PathBuf,
@@ -392,6 +405,8 @@ pub enum LayerAction {
     #[command(alias = "create")]
     Add {
         name: String,
+        #[arg(long, default_value = "color")]
+        channel: painter::maps::Channel,
     },
     Select {
         name: String,

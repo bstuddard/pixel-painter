@@ -1,8 +1,9 @@
 # Verification
 
-Local verification targets Pixel Painter v0.2.0 on Linux, using Rust 1.99.0 and
-the declared minimum Rust 1.88.0. Hosted Windows/macOS checks and a complete
-four-platform download trial remain required before publication.
+Verification covers Pixel Painter v0.3.0 and its three-map exports,
+using Rust 1.99.0 and the declared minimum Rust 1.88.0. Hosted Linux, Windows, and
+macOS checks supplement the local Linux results. A complete four-platform download
+trial remains required before publishing a new release.
 
 ## Core checks
 
@@ -19,14 +20,15 @@ cargo test --manifest-path rust/Cargo.toml --release --no-default-features --loc
 RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path rust/Cargo.toml --no-deps --locked
 ```
 
-The default configuration passes 161 tests, including the doctest, in debug and
-release. Disabling the default `cli` feature passes 121 tests, including the
+The default configuration passes 178 tests, including the doctest, in debug and
+release. Disabling the default `cli` feature passes 135 tests, including the
 doctest, in both profiles; its dependency graph omits
 Clap. Both feature configurations also pass on Rust 1.88.0. CI repeats the core
 checks on each candidate, including both feature configurations of the packaged crate.
 
 Tests exercise these contracts:
 
+- [Three-map contracts](../rust/tests/maps.rs) and [CLI workflows](../rust/tests/maps_cli.rs): channel isolation, coverage, vector encoding at extreme finite magnitudes, generated geometry, shared layout, combined limits, atomic edits, legacy exports, and tampered companion detection.
 - [Coherent authoring](../rust/tests/authoring.rs): typed recipes, transformed
   components, shadows, exact scene pixels, preview limits, stable animation-sheet
   ordering, placement/split exports, pack integrity, and transactional failures.
@@ -57,13 +59,13 @@ diff rust/examples/gallery/SHA256SUMS /tmp/painter-gallery/SHA256SUMS
 
 All 120 generated artifact hashes match the checked-in gallery. The independent
 [Macroquad consumer](../integrations/macroquad/README.md) passes formatting,
-Clippy, and its exported-manifest/timing test on stable Rust and Rust 1.88.0.
+Clippy, and its manifest/timing and map-contract tests on stable Rust and Rust 1.88.0.
 Its graphical smoke test rendered three frames under a temporary Xvfb display
 with software OpenGL and exited successfully. It does not link the painter library.
 
 The Village Corner generator also reproduces all 148 artifact hashes. Together,
-the two generators verify 268 artifacts, including editable inputs and encoded
-exports. The final preview optimizations preserve both checksum manifests.
+the three generators verify 336 artifacts, including editable inputs and encoded
+exports. The three-map implementation preserves the existing 268 hashes; the new lighting generator reproduces 68 additional artifacts. Both consumer modes pass graphical smoke tests, including 70 GPU/reference samples across the sign and cottage, flips, partial alpha, and fallbacks.
 
 ## Preview performance
 
@@ -94,7 +96,8 @@ commands and publication gates. Local checks cover:
   reporting, the bundled CLI guide commands, and an exact RGBA PNG round trip.
 - License/attribution inventory integrity, archive paths, matching version/commit
   identities, platform filenames, and complete download sets. Fixture checks of
-  Windows/macOS layouts do not execute native binaries.
+  Windows/macOS layouts do not execute native binaries. All four layouts check
+  relocated example links, including nested links with queries and fragments.
 
 The strict core dependency audit reports no vulnerabilities or informational
 warnings. The experimental consumer retains two unsuppressed informational
@@ -103,9 +106,10 @@ See the [security review](security-review.md) for the threat model and details.
 
 ## Limits of this evidence
 
-These results describe local Linux execution, not a completed hosted release
-trial. Native Windows/macOS execution and the release Linux baseline must pass in
-CI. Binaries are unsigned and not notarized. No release has been published.
+Local archive execution covers Linux. Native Windows/macOS execution runs in CI;
+the release Linux baseline and all four download archives must pass a release
+trial before publication. Binaries are unsigned and not notarized. Publication
+status and downloads are listed on [GitHub Releases](https://github.com/bstuddard/pixel-painter/releases).
 
 Tests cover ordinary write/publication failures and export cleanup. They do not
 establish power-loss durability. Export bundles use a manifest-last completion
