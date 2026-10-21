@@ -432,6 +432,7 @@ def binary_archive(root, output, notices, binary, platform):
             "security-review.md",
             "coherent-assets.md",
             "three-map-export.md",
+            "authoring-and-review.md",
         ]:
             text = (checkout / "docs" / name).read_text(encoding="utf-8")
             text = text.replace("tests/fixtures/", "examples/recipes/")
@@ -606,6 +607,68 @@ def verify_archive(archive, smoke=False, offline_build=False):
                 if json.loads(original) != json.loads(restored):
                     raise ReleaseError(
                         "packaged executable failed its exact RGBA round trip"
+                    )
+                # Exercise the new authoring/review workflow with PATH empty on
+                # every native target. Bundled editable examples remain unchanged.
+                chest = "examples/workshop/01-material-chest/project.painter.json"
+                before = (root / chest).read_bytes()
+                painter(
+                    "--file",
+                    chest,
+                    "preview",
+                    "--output",
+                    "chest-review",
+                    "--all-frames",
+                    "--scale",
+                    "1",
+                )
+                review = read_json(root / "chest-review/review.json")
+                if len(review["frames"]) != 3 or len(review["views"]) != 7:
+                    raise ReleaseError(
+                        "packaged executable failed its multi-frame review"
+                    )
+                painter(
+                    "--file",
+                    chest,
+                    "render",
+                    "--solo-layer",
+                    "normals",
+                    "--raw",
+                    "--output",
+                    "raw-normals.png",
+                    "--scale",
+                    "1",
+                )
+                shutil.copyfile(root / chest, root / "chest.json")
+                painter(
+                    "--file",
+                    "chest.json",
+                    "--layer",
+                    "base",
+                    "batch",
+                    "--input",
+                    "examples/workshop/01-material-chest/highlight.ops.json",
+                )
+                painter(
+                    "--file",
+                    "chest.json",
+                    "draw",
+                    "--alpha-lock",
+                    "line",
+                    "--x1",
+                    "0",
+                    "--y1",
+                    "30",
+                    "--x2",
+                    "63",
+                    "--y2",
+                    "30",
+                    "--color",
+                    "#D99460",
+                )
+                if (root / chest).read_bytes() != before:
+                    raise ReleaseError(
+                        "review commands modified bundled source artwork"
                     )
         elif info["kind"] == "source":
             if (

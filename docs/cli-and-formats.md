@@ -1,5 +1,8 @@
 # CLI and file formats
 
+For v0.4 material ramps, mask-constrained drawing, alpha lock, isolated-layer
+rendering, and built-in lighting reviews, see [authoring and review](authoring-and-review.md).
+
 Run `painter --help` or any subcommand's `--help` for arguments. Existing `new`,
 `set-pixel`, `print`, `view`, and `export` commands remain supported.
 Global flags can occur before or after subcommands:

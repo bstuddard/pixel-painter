@@ -262,6 +262,16 @@ pub fn polygon(
 
 /// Exact RGBA equality and four-connected neighbors; no tolerance or diagonal fill.
 pub fn flood_fill(canvas: &mut Canvas, start: Point, color: Pixel) -> Result<()> {
+    flood_fill_masked(canvas, start, color, None)
+}
+
+/// Same four-connected fill, with an optional captured selection as a barrier.
+pub(crate) fn flood_fill_masked(
+    canvas: &mut Canvas,
+    start: Point,
+    color: Pixel,
+    selection: Option<&[bool]>,
+) -> Result<()> {
     start.validate()?;
     let (Ok(x), Ok(y)) = (u32::try_from(start.x), u32::try_from(start.y)) else {
         return Err(Error::new(
@@ -272,7 +282,10 @@ pub fn flood_fill(canvas: &mut Canvas, start: Point, color: Pixel) -> Result<()>
     let old = canvas
         .pixel(x, y)
         .ok_or_else(|| Error::new(ErrorCode::OutOfBounds, "fill origin is outside canvas"))?;
-    if old == color {
+    let width = canvas.width() as usize;
+    let selected =
+        |x: u32, y: u32| selection.is_none_or(|mask| mask[y as usize * width + x as usize]);
+    if old == color || !selected(x, y) {
         return Ok(());
     }
     let mut queue = VecDeque::from([(x, y)]);
@@ -284,7 +297,7 @@ pub fn flood_fill(canvas: &mut Canvas, start: Point, color: Pixel) -> Result<()>
             (x, y.wrapping_sub(1)),
             (x, y + 1),
         ] {
-            if canvas.pixel(nx, ny) == Some(old) {
+            if canvas.pixel(nx, ny) == Some(old) && selected(nx, ny) {
                 canvas.set_pixel(nx, ny, color)?;
                 queue.push_back((nx, ny));
             }

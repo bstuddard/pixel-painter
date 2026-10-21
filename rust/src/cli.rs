@@ -67,6 +67,24 @@ pub enum Command {
         /// Atomically replace an existing preview (never the input artwork).
         #[arg(long)]
         replace: bool,
+        /// Inspect one layer, including hidden layers, with its opacity applied.
+        #[arg(long, conflicts_with = "channel")]
+        solo_layer: Option<String>,
+        /// Preserve exact cel bytes instead of applying layer opacity.
+        #[arg(long, requires = "solo_layer")]
+        raw: bool,
+        /// Render the effective channel, including color coverage and normal fallback.
+        #[arg(long)]
+        channel: Option<painter::maps::Channel>,
+    },
+    /// Write map views, directional lighting, diagnostics, and a frame contact sheet.
+    Preview {
+        #[arg(short, long)]
+        output: PathBuf,
+        #[arg(long, default_value_t = 4)]
+        scale: u32,
+        #[arg(long)]
+        all_frames: bool,
     },
     /// Report dimensions, colors, transparency, and occupied bounds.
     Inspect {
@@ -83,10 +101,14 @@ pub enum Command {
         palette: Option<PathBuf>,
         #[arg(long, value_enum)]
         policy: Option<CliPolicy>,
+        #[command(flatten)]
+        selection: SelectionArgs,
     },
     Draw {
         #[arg(long)]
         palette: Option<PathBuf>,
+        #[command(flatten)]
+        selection: SelectionArgs,
         #[command(subcommand)]
         shape: Draw,
     },
@@ -111,6 +133,8 @@ pub enum Command {
         y: i32,
         #[arg(long)]
         over: bool,
+        #[command(flatten)]
+        selection: SelectionArgs,
     },
     /// Import PNG to a new flat canvas. Existing artwork is never overwritten.
     Import {
@@ -201,6 +225,16 @@ pub struct Bounds {
     pub width: u32,
     #[arg(long)]
     pub height: u32,
+}
+
+#[derive(Args)]
+pub struct SelectionArgs {
+    /// Same-size PNG or canvas JSON; nonzero alpha selects editable pixels.
+    #[arg(long)]
+    pub mask: Option<PathBuf>,
+    /// Edit only covered destination pixels and preserve their original alpha.
+    #[arg(long)]
+    pub alpha_lock: bool,
 }
 
 #[derive(Subcommand)]

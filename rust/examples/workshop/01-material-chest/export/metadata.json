@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "image": "sheet.png",
+  "preview": "preview.png",
+  "animation": "animation.png",
+  "width": 192,
+  "height": 56,
+  "frames": [
+    {
+      "name": "frame-0",
+      "file": "frames/0000.png",
+      "rect": {
+        "x": 0,
+        "y": 0,
+        "width": 64,
+        "height": 56
+      },
+      "duration_ms": 100,
+      "pivot": null
+    },
+    {
+      "name": "shadow",
+      "file": "frames/0001.png",
+      "rect": {
+        "x": 64,
+        "y": 0,
+        "width": 64,
+        "height": 56
+      },
+      "duration_ms": 450,
+      "pivot": null
+    },
+    {
+      "name": "highlight",
+      "file": "frames/0002.png",
+      "rect": {
+        "x": 128,
+        "y": 0,
+        "width": 64,
+        "height": 56
+      },
+      "duration_ms": 450,
+      "pivot": null
+    }
+  ],
+  "tags": {},
+  "maps": {
+    "emissive": {
+      "sheet": "emissive/sheet.png",
+      "frames": [
+        "emissive/frames/0000.png",
+        "emissive/frames/0001.png",
+        "emissive/frames/0002.png"
+      ],
+      "encoding": "rgba8_emission"
+    },
+    "normal": {
+      "sheet": "normal/sheet.png",
+      "frames": [
+        "normal/frames/0000.png",
+        "normal/frames/0001.png",
+        "normal/frames/0002.png"
+      ],
+      "encoding": "xyz_unorm8",
+      "space": "screen",
+      "positive_y": "up",
+      "default": "flat"
+    }
+  }
+}

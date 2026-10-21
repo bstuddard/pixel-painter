@@ -1,6 +1,6 @@
 [package]
 name = "painter"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 rust-version = "1.88"
 description = "Deterministic pixel-art library and CLI with layers, animation, and asset exports"

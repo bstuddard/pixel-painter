@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "width": 256,
+  "height": 132,
+  "background": "#101D2B",
+  "assets": [
+    {
+      "id": "asset-0",
+      "input": "01-material-chest/export/frames/0000.png",
+      "position": {
+        "x": 0,
+        "y": 0
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-1",
+      "input": "01-material-chest/export/frames/0001.png",
+      "position": {
+        "x": 64,
+        "y": 0
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-2",
+      "input": "01-material-chest/export/frames/0002.png",
+      "position": {
+        "x": 128,
+        "y": 0
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-3",
+      "input": "02-masked-sentinel/export/frames/0001.png",
+      "position": {
+        "x": 196,
+        "y": 0
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-4",
+      "input": "03-cottage-review/review/frames/0000/light-left.png",
+      "position": {
+        "x": 4,
+        "y": 65
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-5",
+      "input": "03-cottage-review/review/frames/0000/light-right.png",
+      "position": {
+        "x": 70,
+        "y": 65
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-6",
+      "input": "03-cottage-review/review/frames/0000/light-top.png",
+      "position": {
+        "x": 136,
+        "y": 65
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "id": "asset-7",
+      "input": "02-masked-sentinel/export/frames/0000.png",
+      "position": {
+        "x": 196,
+        "y": 64
+      },
+      "anchor": {
+        "x": 0,
+        "y": 0
+      }
+    }
+  ]
+}

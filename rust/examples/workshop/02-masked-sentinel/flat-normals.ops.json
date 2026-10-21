@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "fill_rect",
+      "x": 0,
+      "y": 0,
+      "width": 48,
+      "height": 64,
+      "color": "#8080FF"
+    }
+  ]
+}

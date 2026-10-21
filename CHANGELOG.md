@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.4.0
+
+- Added material-aware shading with explicit named dark-to-light ramps, exact RGB
+  ownership, endpoint clamping, palette names, and preserved alpha.
+- Added reusable binary masks and alpha locking to existing drawing operations,
+  batches, and stamps. Flood fills respect mask barriers; transparent brush texels
+  and erasing preserve prior edits while alpha is locked. Mask snapshots,
+  dimensions, transformations, memory, and work are validated transactionally.
+- Added explicit solo-layer and raw-cel rendering, including hidden layers, plus
+  effective-channel inspection without changing project state.
+- Added read-only review bundles: native frame maps, linear-light directional
+  previews, animation contact sheets, and machine-readable normal/emission
+  coverage diagnostics. Export and preview share the same map coverage code.
+- Added an editable material/brush workshop with 97 reproducible artifacts and
+  expanded the main README with a visual gallery and tested usage walkthrough.
+- Published stable GitHub releases with native executables for Linux, Windows,
+  and both macOS architectures, plus matching vendored source and checksums.
+  The optional Macroquad consumer remains experimental with its documented
+  upstream advisories; the core dependency graph is separate.
+
 ## 0.3.0 — preview
 
 - Added semantic color/emissive/normal layers and opt-in three-map exports with

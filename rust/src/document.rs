@@ -302,6 +302,26 @@ impl Document {
         self.composite_layers(index, Channel::Color, None)
     }
 
+    /// Inspect one layer even when hidden. Raw mode retains cel bytes; solo mode
+    /// applies layer opacity without other layers, coverage clipping, or fallback.
+    pub fn render_layer(&self, index: usize, name: &str, raw: bool) -> Result<Canvas> {
+        let layer_index = self.layer_index(name)?;
+        let frame = self
+            .frames
+            .get(index)
+            .ok_or_else(|| Error::new(ErrorCode::OutOfBounds, "frame index is outside project"))?;
+        let mut result = frame.cels[layer_index].clone();
+        if !raw {
+            let layer = &self.layers[layer_index];
+            for pixel in result.pixels_mut() {
+                *pixel = layer
+                    .channel
+                    .composite(*pixel, crate::Pixel::TRANSPARENT, layer.opacity);
+            }
+        }
+        Ok(result)
+    }
+
     pub(crate) fn composite_layers(
         &self,
         index: usize,
@@ -348,21 +368,7 @@ impl Document {
         color: &Canvas,
     ) -> Result<Canvas> {
         let mut map = self.composite_layers(index, channel, None)?;
-        for (target, coverage) in map.pixels_mut().iter_mut().zip(color.pixels()) {
-            if coverage.a == 0 {
-                *target = crate::Pixel::TRANSPARENT;
-            } else if channel == Channel::Normal {
-                if target.a == 0 {
-                    *target = maps::FLAT_NORMAL;
-                }
-                target.a = coverage.a;
-            } else {
-                target.a = ((u16::from(target.a) * u16::from(coverage.a) + 127) / 255) as u8;
-                if target.a == 0 {
-                    *target = crate::Pixel::TRANSPARENT;
-                }
-            }
-        }
+        maps::apply_coverage(&mut map, color, channel);
         Ok(map)
     }
 

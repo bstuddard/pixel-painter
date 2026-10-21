@@ -21,6 +21,16 @@ __pycache__/
 /rust/preview.png
 /rust/artwork.png
 
+# README quick-start and workshop working files
+/gem.json
+/gem.png
+/gem-preview.png
+/gem-review/
+/chest.json
+/chest.png
+/chest-normals.png
+/chest-review/
+
 # Local game-art experiments
 /local-assets/
 
