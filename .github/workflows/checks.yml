@@ -126,6 +126,13 @@ jobs:
       - name: Verify lighting artifact hashes
         working-directory: rust/examples/lighting
         run: sha256sum --check SHA256SUMS
+      - name: Reproduce material and mask workshop
+        run: |
+          python3 rust/examples/generate_workshop.py --painter rust/target/release/painter --output "$RUNNER_TEMP/workshop"
+          diff rust/examples/workshop/SHA256SUMS "$RUNNER_TEMP/workshop/SHA256SUMS"
+      - name: Verify workshop artifact hashes
+        working-directory: rust/examples/workshop
+        run: sha256sum --check SHA256SUMS
       - name: Verify checked-in artifact hashes
         working-directory: rust/examples/gallery
         run: sha256sum --check SHA256SUMS

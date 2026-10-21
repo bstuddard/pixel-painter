@@ -35,7 +35,7 @@ test or proof of the absence of vulnerabilities.
   against one source commit. Packaging rejects dirty candidates and mismatched
   tags, validates archive paths and local documentation links, preserves upstream
   license texts, and tests extracted binaries and offline source. Tag pushes only
-  build artifacts; public previews require an explicit manual publication request.
+  build artifacts; public releases require an explicit manual publication request.
   Verification also requires archive filenames to match their platform/layout and
   recomputes the complete dependency lock identity from notice records, rejecting
   missing, duplicate, or altered package entries before checksums are produced.
@@ -247,3 +247,25 @@ samplers alone retain raw IDs. Readback tests compare 70 samples against the CPU
 reference across both assets, all modes, flips, fallback samplers, and partial
 coverage. This does not repair or change the upstream Macroquad advisories above.
 No dependency was added to either package.
+
+## Authoring and review (v0.4.0)
+
+- No new dependencies, network access, external processes, or unsafe Rust were
+  introduced in the core. Strict core advisory audit remains clean. The separate
+  Macroquad consumer retains the two unsuppressed upstream advisories documented
+  above; a stable core release does not change that demo's experimental status.
+- Material ramp arrays, colors, and names are bounded. Ambiguous RGB ownership,
+  invalid alpha, and map-layer shading fail transactionally. Extreme signed step
+  counts use widened arithmetic before clamping.
+- Mask and brush storage share the existing aggregate pixel bound. Selections and
+  alpha snapshots are charged against the batch work limit. Mask dimensions and
+  incompatible transforms are rejected. Excluded RGBA bytes, normal validation,
+  palette checks, indexed diagnostics, and whole-batch rollback are preserved.
+- Review bundles preflight dimensions, combined native views, scaled sheets, and
+  work before creating output. They use fixed indexed filenames and the shared
+  staged-directory publisher, refuse overwrites, and publish their completion
+  marker last. Layer/material/frame names never become output paths.
+- Solo/raw/channel and bundle previews leave the source project unchanged.
+  Diagnostics contain frame names and counts, without source paths, credentials,
+  environment values, or arbitrary PNG metadata. Generated PNGs contain no text
+  or EXIF chunks. Source and release downloads are scanned before publication.

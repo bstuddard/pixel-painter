@@ -1,4 +1,4 @@
-# Pixel Painter ${version} preview — ${platform}
+# Pixel Painter ${version} — ${platform}
 
 Extract the whole archive into a writable folder. Rust is not required to run the
 included executable. These commands create new files and refuse overwrites.
@@ -24,6 +24,17 @@ Open the [review gallery](examples/gallery/README.md) or the
 describes compatibility and limitations. The [security review](docs/security-review.md)
 explains input protections and the experimental consumer's known advisories.
 
+The [v0.4 workshop](examples/workshop/README.md) shows material palette shading,
+mask-constrained brushes, and read-only lighting reviews. Try the built-in review:
+
+```sh
+./painter --file examples/workshop/01-material-chest/project.painter.json preview --output chest-review --all-frames --scale 4
+```
+
+On Windows use `.\painter.exe` in place of `./painter`. Open
+`chest-review/contact-sheet.png` and `chest-review/review.json`. See the
+[authoring and review guide](docs/authoring-and-review.md) for commands and formats.
+
 The [Village Corner example](examples/village/README.md) includes coherent recipes,
 split placement exports, and scene previews. See [coherent asset families](docs/coherent-assets.md)
 for profiles, parameterized recipes, animation checks, and pack generation.
@@ -36,8 +47,8 @@ Release CI tests this target on **${baseline}**. Local builds may require newer
 system libraries; `BUILD-INFO.json` records the actual build host. The macOS
 deployment target describes how release binaries are built; versions earlier than
 the CI baseline are unverified. Linux downloads require GNU libc. Other systems can build
-the matching source. Binaries are unsigned and not notarized; this preview is
-intended for evaluation. Keep editable artwork backups and run edits sequentially.
+the matching source. Binaries are unsigned and not notarized.
+Keep editable artwork backups and run edits sequentially.
 
 `BUILD-INFO.json` identifies the source commit, compiler, target, and binary hash.
 Verify the archive against `SHA256SUMS` from the same download set. Checksums detect

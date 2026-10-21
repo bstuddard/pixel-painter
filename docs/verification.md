@@ -1,6 +1,6 @@
 # Verification
 
-Verification covers Pixel Painter v0.3.0 and its three-map exports,
+Verification covers Pixel Painter v0.4.0, its authoring/review features, and three-map exports,
 using Rust 1.99.0 and the declared minimum Rust 1.88.0. Hosted Linux, Windows, and
 macOS checks supplement the local Linux results. A complete four-platform download
 trial remains required before publishing a new release.
@@ -20,13 +20,15 @@ cargo test --manifest-path rust/Cargo.toml --release --no-default-features --loc
 RUSTDOCFLAGS='-D warnings' cargo doc --manifest-path rust/Cargo.toml --no-deps --locked
 ```
 
-The default configuration passes 178 tests, including the doctest, in debug and
-release. Disabling the default `cli` feature passes 135 tests, including the
+The default configuration passes 200 tests, including the doctest, in debug and
+release. Disabling the default `cli` feature passes 154 tests, including the
 doctest, in both profiles; its dependency graph omits
 Clap. Both feature configurations also pass on Rust 1.88.0. CI repeats the core
 checks on each candidate, including both feature configurations of the packaged crate.
 
 Tests exercise these contracts:
+
+- [v0.4 authoring](../rust/tests/authoring_v4.rs) and [CLI](../rust/tests/authoring_v4_cli.rs): material ownership, named ramps, masks, alpha snapshots, masked flood barriers (all 512 binary 3×3 masks), transparent brushes, rollback, limits, raw/solo/effective views, independent lighting pixels, and read-only review bundles.
 
 - [Three-map contracts](../rust/tests/maps.rs) and [CLI workflows](../rust/tests/maps_cli.rs): channel isolation, coverage, vector encoding at extreme finite magnitudes, generated geometry, shared layout, combined limits, atomic edits, legacy exports, and tampered companion detection.
 - [Coherent authoring](../rust/tests/authoring.rs): typed recipes, transformed
@@ -114,3 +116,16 @@ status and downloads are listed on [GitHub Releases](https://github.com/bstuddar
 Tests cover ordinary write/publication failures and export cleanup. They do not
 establish power-loss durability. Export bundles use a manifest-last completion
 protocol; concurrent writers remain unsupported, so edits must run sequentially.
+
+## v0.4 release review
+
+The second engineering pass shares map coverage between exports and reviews,
+retains transparent brush texels during alpha-locked edits, preserves indexed
+flood-fill errors, and includes enlarged review sheets in the work budget.
+No dependencies were added. The README quick start is covered by a CLI workflow
+and all local Markdown links are checked, including relocated executable guides.
+
+The new workshop contributes 97 reproducible artifacts alongside the existing
+336. Native archive smoke tests exercise material shading, alpha locking, raw
+layer rendering, and all-frame reviews with an empty PATH. Publication remains
+conditional on the complete hosted check and four-platform archive build.

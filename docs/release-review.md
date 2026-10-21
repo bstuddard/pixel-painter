@@ -1,6 +1,6 @@
 # Release preparation
 
-Pixel Painter v0.3.0 is a preview. The [verification record](verification.md)
+Pixel Painter v0.4.0 is a stable release candidate. The [verification record](verification.md)
 describes completed Linux checks; hosted Windows/macOS checks and a complete
 four-platform trial download set must pass before publication. The optional
 Macroquad consumer retains the [documented advisories](security-review.md).
@@ -38,10 +38,10 @@ For example, using a fresh directory outside the checkout:
 python3 -m unittest discover -s tools -v
 python3 tools/release.py prepare
 python3 tools/release.py source --output /tmp/painter-candidate/dist --notices /tmp/painter-candidate/notices
-python3 tools/release.py verify /tmp/painter-candidate/dist/painter-0.3.0-source.tar.gz --offline-build
+python3 tools/release.py verify /tmp/painter-candidate/dist/painter-0.4.0-source.tar.gz --offline-build
 cargo build --release --locked --manifest-path rust/Cargo.toml
 python3 tools/release.py binary --binary rust/target/release/painter --platform linux-x86_64 --notices /tmp/painter-candidate/notices --output /tmp/painter-candidate/dist
-python3 tools/release.py verify /tmp/painter-candidate/dist/painter-0.3.0-linux-x86_64.tar.gz --smoke
+python3 tools/release.py verify /tmp/painter-candidate/dist/painter-0.4.0-linux-x86_64.tar.gz --smoke
 ```
 
 Use the platform corresponding to the actual compiler target. The native workflow
@@ -67,7 +67,7 @@ and attribution texts, and `BUILD-INFO.json`. The latter records the source comm
 compiler, target, and binary hash. These records do not constitute a signed
 attestation. Original license files also remain in the vendored source.
 
-`checksums --directory DIR --version 0.3.0` requires exactly one source archive
+`checksums --directory DIR --version 0.4.0` requires exactly one source archive
 and all four native archives. It validates their layouts, notice file hashes,
 local Markdown links, and shared version/commit/core lock identity before writing
 `SHA256SUMS`. Filenames must match their platform contents; notice records must
@@ -85,8 +85,8 @@ the final candidate; keep known limitations visible.
 
 Only a manual dispatch with `publish` explicitly true and a matching existing
 tag can enter the write-enabled publication job after every required job passes.
-It creates or updates a draft preview and uploads the validated five archives and
-checksums before making the preview public. Existing public releases are not
+It creates or updates a draft release and uploads the validated five archives and
+checksums before publishing it as a stable release and marking it latest. Existing public releases are not
 overwritten. Binaries are unsigned and not notarized. Configure signing, macOS
 notarization, or stronger provenance separately if the intended distribution
 requires them.

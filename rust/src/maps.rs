@@ -127,6 +127,25 @@ impl<'de> Deserialize<'de> for MapRequest {
 
 pub const FLAT_NORMAL: Pixel = Pixel::rgba(128, 128, 255, 255);
 
+/// Shared export/review coverage contract. Callers provide aligned companion maps.
+pub(crate) fn apply_coverage(map: &mut Canvas, color: &Canvas, channel: Channel) {
+    for (target, coverage) in map.pixels_mut().iter_mut().zip(color.pixels()) {
+        if coverage.a == 0 {
+            *target = Pixel::TRANSPARENT;
+        } else if channel == Channel::Normal {
+            if target.a == 0 {
+                *target = FLAT_NORMAL;
+            }
+            target.a = coverage.a;
+        } else {
+            target.a = ((u16::from(target.a) * u16::from(coverage.a) + 127) / 255) as u8;
+            if target.a == 0 {
+                *target = Pixel::TRANSPARENT;
+            }
+        }
+    }
+}
+
 /// Encode a finite, nonzero direction as XYZ UNORM8; +X right, +Y up, +Z viewer.
 pub fn encode_normal(x: f64, y: f64, z: f64, alpha: u8) -> Result<Pixel> {
     let largest = x.abs().max(y.abs()).max(z.abs());

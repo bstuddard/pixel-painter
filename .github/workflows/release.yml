@@ -10,7 +10,7 @@ on:
         required: false
         type: string
       publish:
-        description: Publish the checked tag as a public preview release
+        description: Publish the checked tag as a public stable release
         required: true
         default: false
         type: boolean
@@ -194,7 +194,7 @@ jobs:
         with:
           name: release-downloads
           path: dist
-      - name: Publish explicitly requested preview release
+      - name: Publish explicitly requested stable release
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
@@ -205,7 +205,7 @@ jobs:
           if gh release view "$TAG" --json isDraft --jq .isDraft > "$RUNNER_TEMP/release-is-draft"; then
             test "$(cat "$RUNNER_TEMP/release-is-draft")" = true
           else
-            gh release create "$TAG" --verify-tag --draft --prerelease --title "$TAG preview" --notes-file CHANGELOG.md
+            gh release create "$TAG" --verify-tag --draft --title "$TAG" --notes-file CHANGELOG.md
           fi
           gh release upload "$TAG" dist/* --clobber
-          gh release edit "$TAG" --notes-file CHANGELOG.md --draft=false --prerelease
+          gh release edit "$TAG" --notes-file CHANGELOG.md --draft=false --prerelease=false --latest

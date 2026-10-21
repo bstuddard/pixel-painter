@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "operations": [
+    {
+      "op": "shade",
+      "ramps": [
+        {
+          "name": "wood",
+          "colors": [
+            "#623C40",
+            "#A85F46",
+            "#D99460",
+            "#F2C280"
+          ]
+        },
+        {
+          "name": "steel",
+          "colors": [
+            "#3E5169",
+            "#728DA0",
+            "#B6CFCD",
+            "#E4ECD8"
+          ]
+        }
+      ],
+      "steps": 1
+    }
+  ]
+}

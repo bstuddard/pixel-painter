@@ -5,6 +5,8 @@ use crate::{
     Canvas, Error, ErrorCode, Pixel, Result,
     drawing::{self, Axis, Point, Rect},
     maps::{self, Channel},
+    mask::{Mask, Selection},
+    material::{self, Ramp},
     palette::{Color, Palette, Policy},
 };
 use serde::{Deserialize, Serialize};
@@ -20,6 +22,10 @@ pub struct Batch {
     pub palette: Option<Palette>,
     #[serde(default)]
     pub policy: Policy,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mask: Option<Mask>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub alpha_lock: bool,
     #[serde(deserialize_with = "crate::limits::sequence::<'de, _, _, 10_000>")]
     pub operations: Vec<Operation>,
 }
@@ -27,6 +33,12 @@ pub struct Batch {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case", deny_unknown_fields)]
 pub enum Operation {
+    /// Move visible colors within explicit material ramps, preserving alpha.
+    Shade {
+        #[serde(deserialize_with = "crate::limits::sequence::<'de, _, _, 64>")]
+        ramps: Vec<Ramp>,
+        steps: i32,
+    },
     SetPixel {
         x: i32,
         y: i32,
@@ -170,6 +182,8 @@ impl Batch {
             seed: 0,
             palette: None,
             policy: Policy::Unrestricted,
+            mask: None,
+            alpha_lock: false,
             operations,
         }
     }
@@ -247,11 +261,23 @@ impl Batch {
                 } => Some(canvas.pixels().len() as u64),
                 _ => None,
             })
-            .sum();
+            .sum::<u64>()
+            + match &self.mask {
+                Some(Mask::Canvas {
+                    canvas,
+                }) => canvas.pixels().len() as u64,
+                _ => 0,
+            };
         if embedded > crate::canvas::MAX_PIXELS {
             return Err(Error::limit(
                 "embedded components exceed aggregate pixel limit",
             ));
+        }
+        let selection = Selection::capture(canvas, self.mask.as_ref(), self.alpha_lock)?;
+        if selection.is_some() {
+            *remaining = remaining
+                .checked_sub(canvas.pixels().len() as u64)
+                .ok_or_else(|| Error::limit("mask capture exceeds rasterization budget"))?;
         }
         if let Some(palette) = &self.palette {
             palette.validate()?;
@@ -268,6 +294,15 @@ impl Batch {
         let mut clipboard = BTreeMap::<String, Canvas>::new();
         let mut random = Random(seed);
         for (index, operation) in self.operations.iter().enumerate() {
+            if channel != Channel::Color && matches!(operation, Operation::Shade { .. }) {
+                return Err(Error::invalid("material shading requires a color layer").at(index));
+            }
+            if selection.is_some() && operation.transforms_canvas() {
+                return Err(Error::invalid(
+                    "masked batches cannot transform canvas coordinates or dimensions",
+                )
+                .at(index));
+            }
             if channel == Channel::Normal && operation.blends_paint() {
                 return Err(Error::invalid(
                     "normal edits replace vectors; alpha paint blending is not supported",
@@ -277,6 +312,16 @@ impl Batch {
             let transform = channel == Channel::Normal
                 && matches!(operation, Operation::Flip { .. } | Operation::Rotate { .. });
             let cost = operation.cost(&edited)
+                + if self.alpha_lock {
+                    edited.pixels().len() as u64
+                } else {
+                    0
+                }
+                + if selection.is_some() {
+                    edited.pixels().len() as u64
+                } else {
+                    0
+                }
                 + if transform {
                     edited.pixels().len() as u64
                 } else {
@@ -285,14 +330,41 @@ impl Batch {
             *remaining = remaining
                 .checked_sub(cost)
                 .ok_or_else(|| Error::limit("batch exceeds rasterization budget").at(index))?;
-            operation
-                .apply(
-                    &mut edited,
-                    &mut clipboard,
-                    self.palette.as_ref(),
-                    &mut random,
-                )
-                .map_err(|e| e.at(index))?;
+            let previous = self.alpha_lock.then(|| edited.clone());
+            if let (
+                Some(selection),
+                Operation::Fill {
+                    x,
+                    y,
+                    color,
+                },
+            ) = (&selection, operation)
+            {
+                selection
+                    .fill(
+                        &mut edited,
+                        Point {
+                            x: *x,
+                            y: *y,
+                        },
+                        color
+                            .resolve(self.palette.as_ref())
+                            .map_err(|error| error.at(index))?,
+                    )
+                    .map_err(|error| error.at(index))?;
+            } else {
+                operation
+                    .apply(
+                        &mut edited,
+                        &mut clipboard,
+                        self.palette.as_ref(),
+                        &mut random,
+                    )
+                    .map_err(|e| e.at(index))?;
+            }
+            if let Some(selection) = &selection {
+                selection.constrain(&mut edited, canvas, previous.as_ref());
+            }
             if transform {
                 for pixel in edited.pixels_mut() {
                     match operation {
@@ -308,7 +380,19 @@ impl Batch {
             }
         }
         if let Some(palette) = &self.palette {
+            if self.alpha_lock {
+                *remaining = remaining
+                    .checked_sub(edited.pixels().len() as u64)
+                    .ok_or_else(|| Error::limit("alpha lock exceeds rasterization budget"))?;
+            }
+            let previous = self.alpha_lock.then(|| edited.clone());
             palette.constrain_budgeted(&mut edited, self.policy, remaining)?;
+            if let Some(selection) = &selection {
+                *remaining = remaining
+                    .checked_sub(edited.pixels().len() as u64)
+                    .ok_or_else(|| Error::limit("mask validation exceeds rasterization budget"))?;
+                selection.constrain(&mut edited, canvas, previous.as_ref());
+            }
         }
         if channel == Channel::Normal {
             *remaining = remaining
@@ -339,6 +423,16 @@ impl Batch {
 }
 
 impl Operation {
+    fn transforms_canvas(&self) -> bool {
+        matches!(
+            self,
+            Self::Flip { .. }
+                | Self::Rotate { .. }
+                | Self::Move { .. }
+                | Self::Crop { .. }
+                | Self::Resize { .. }
+        )
+    }
     fn blends_paint(&self) -> bool {
         match self {
             Self::SetPixel {
@@ -387,6 +481,16 @@ impl Operation {
             .visible_area(canvas)
         };
         match self {
+            Self::Shade {
+                ramps,
+                ..
+            } => {
+                canvas.pixels().len() as u64
+                    + ramps
+                        .iter()
+                        .map(|ramp| ramp.colors.len() as u64)
+                        .sum::<u64>()
+            }
             Self::SetPixel {
                 ..
             } => 1,
@@ -467,6 +571,10 @@ impl Operation {
     ) -> Result<()> {
         let resolve = |color: &Color| color.resolve(palette);
         match self {
+            Self::Shade {
+                ramps,
+                steps,
+            } => material::shade(canvas, ramps, *steps, palette)?,
             Self::SetPixel {
                 x,
                 y,
@@ -764,5 +872,32 @@ mod tests {
         .unwrap_err();
         assert_eq!(error.code, ErrorCode::ResourceLimit);
         assert_eq!(canvas.pixels(), &[red, red]);
+    }
+
+    #[test]
+    fn mask_capture_constraining_and_alpha_snapshots_share_the_batch_budget() {
+        use super::{Batch, Operation};
+        use crate::{Canvas, ErrorCode, Pixel, mask::Mask, palette::Color};
+        for alpha_lock in [false, true] {
+            let mut canvas = Canvas::from_pixels(2, 1, vec![Pixel::rgba(1, 2, 3, 255); 2]).unwrap();
+            let before = canvas.clone();
+            let mut batch = Batch::new(vec![Operation::Clear {
+                color: Some(Color::Rgba(Pixel::rgba(255, 255, 255, 255))),
+            }]);
+            batch.mask = Some(Mask::Alpha {});
+            batch.alpha_lock = alpha_lock;
+            let mut remaining = if alpha_lock { 7 } else { 5 };
+            assert_eq!(
+                batch
+                    .apply_budgeted(&mut canvas, 0, &mut remaining)
+                    .unwrap_err()
+                    .code,
+                ErrorCode::ResourceLimit
+            );
+            assert_eq!(canvas, before);
+            let mut enough = if alpha_lock { 8 } else { 6 };
+            batch.apply_budgeted(&mut canvas, 0, &mut enough).unwrap();
+            assert_eq!(enough, 0);
+        }
     }
 }

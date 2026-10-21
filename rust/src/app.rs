@@ -2,8 +2,8 @@
 //! CLI dispatch: library calls, explicit persistence, and human/JSON presentation.
 
 use crate::cli::{
-    Bounds, Cli, Command, Draw, FrameAction, LayerAction, Packing, ProjectCommand, TagAction,
-    TileCommand, Transform,
+    Bounds, Cli, Command, Draw, FrameAction, LayerAction, Packing, ProjectCommand, SelectionArgs,
+    TagAction, TileCommand, Transform,
 };
 use painter::{
     Canvas, Document, Error, ErrorCode, Pixel, Result,
@@ -106,6 +106,24 @@ impl Context {
         }
     }
 }
+fn select(batch: &mut Batch, selection: SelectionArgs) -> Result<()> {
+    if let Some(path) = selection.mask {
+        let canvas = if path
+            .extension()
+            .is_some_and(|extension| extension.eq_ignore_ascii_case("png"))
+        {
+            storage::import_png(&path, false)?
+        } else {
+            storage::load(&path)?
+        };
+        batch.mask = Some(painter::mask::Mask::Canvas {
+            canvas,
+        });
+    }
+    batch.alpha_lock |= selection.alpha_lock;
+    Ok(())
+}
+
 fn palette(path: Option<&Path>) -> Result<Option<Palette>> {
     path.map(|path| {
         let palette: Palette = storage::read_json(path)?;
@@ -258,6 +276,9 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
             output,
             scale,
             replace,
+            solo_layer,
+            raw,
+            channel,
         } => {
             if scale == 0 || scale > 64 {
                 return Err(Error::invalid("scale must be 1..=64"));
@@ -269,7 +290,19 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
             {
                 return Err(Error::invalid("preview cannot replace input artwork"));
             }
-            let canvas = context.load()?.composite()?;
+            let artwork = context.load()?;
+            let canvas = match (&artwork, solo_layer, channel) {
+                (Artwork::Project(document), Some(layer), _) => {
+                    document.render_layer(document.active_frame(), &layer, raw)?
+                }
+                (Artwork::Project(document), None, Some(channel)) => {
+                    document.render_channel(document.active_frame(), channel)?
+                }
+                (Artwork::Canvas(_), Some(_), _) | (Artwork::Canvas(_), _, Some(_)) => {
+                    return Err(Error::invalid("layer/channel previews require a project"));
+                }
+                _ => artwork.composite()?,
+            };
             let scaled = drawing::resize(
                 &canvas,
                 canvas
@@ -291,6 +324,23 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
                 json!({"version":1,"ok":true,"output":path_value(&output),"width":scaled.width(),"height":scaled.height()}),
             )
         }
+        Command::Preview {
+            output,
+            scale,
+            all_frames,
+        } => {
+            let artwork = context.load()?;
+            let document = match artwork {
+                Artwork::Project(document) => document,
+                Artwork::Canvas(canvas) => Document::from_canvas(canvas)?,
+            };
+            let review = painter::preview::write(&document, &output, scale, all_frames)?;
+            message(
+                context.json,
+                format!("Wrote review to {}", output.display()),
+                json!({"version":1,"ok":true,"output":path_value(&output),"review":review}),
+            )
+        }
         Command::Inspect {
             palette: path,
         } => {
@@ -305,6 +355,7 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
             dry_run,
             palette: path,
             policy,
+            selection,
         } => {
             let mut batch: Batch = storage::read_json(&input)?;
             if let Some(path) = path {
@@ -313,15 +364,18 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
             if let Some(policy) = policy {
                 batch.policy = policy.into();
             }
+            select(&mut batch, selection)?;
             context.edit(batch, dry_run)
         }
         Command::Draw {
             palette: path,
             shape,
+            selection,
         } => {
             let operation = draw_operation(shape)?;
             let mut batch = Batch::new(vec![operation]);
             batch.palette = palette(path.as_deref())?;
+            select(&mut batch, selection)?;
             context.edit(batch, false)
         }
         Command::Transform {
@@ -380,15 +434,17 @@ pub(crate) fn run(cli: Cli) -> Result<std::process::ExitCode> {
             x,
             y,
             over,
-        } => context.edit(
-            Batch::new(vec![Operation::Stamp {
+            selection,
+        } => {
+            let mut batch = Batch::new(vec![Operation::Stamp {
                 canvas: storage::load(&input)?,
                 x,
                 y,
                 over,
-            }]),
-            false,
-        ),
+            }]);
+            select(&mut batch, selection)?;
+            context.edit(batch, false)
+        }
         Command::Import {
             input,
             reduce_16,

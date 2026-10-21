@@ -368,6 +368,7 @@ class ReleaseTests(unittest.TestCase):
             "rust/examples/gallery/README.md",
             "rust/examples/village/README.md",
             "rust/examples/lighting/README.md",
+            "rust/examples/workshop/README.md",
             "rust/examples/lighting/nested/README.md",
             "rust/examples/village/scene.json",
         ]:
@@ -389,6 +390,7 @@ class ReleaseTests(unittest.TestCase):
             "security-review.md",
             "coherent-assets.md",
             "three-map-export.md",
+            "authoring-and-review.md",
         ]:
             (self.root / "docs" / name).write_text(
                 "[consumer](../integrations/macroquad/README.md)\n"

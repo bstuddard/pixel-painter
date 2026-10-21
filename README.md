@@ -1,44 +1,84 @@
 # Pixel Painter
 
-Pixel Painter v0.3.0 adds [emissive and normal maps](docs/three-map-export.md) to
-project exports with pixel-aligned lighting data. Review the
-[editable lighting examples](rust/examples/lighting/README.md) and shared map contract.
+Pixel Painter is an offline pixel-art CLI and Rust library. Make sprites, tiles,
+buildings, and animations with commands or editable JSON, then export PNGs and
+engine-neutral metadata. No account, cloud service, or image model is required.
 
-Pixel Painter is an offline tool for making pixel-art sprites, tiles, buildings,
-and animations through commands or editable JSON recipes. Save PNGs for any engine,
-or use the Rust library to build your own tools. No cloud service is required.
+**v0.4.0** adds material palette shading, mask-constrained brushes, isolated-layer
+inspection, and built-in lighting reviews. [Download the stable release](https://github.com/bstuddard/pixel-painter/releases/latest)
+for Linux, Windows, or macOS, or build from source below.
 
-![A village created and composed through painter commands](rust/examples/village/scene.png)
+![Three material variants, masked painting, and directional lighting](rust/examples/workshop/hero.png)
 
-Open [Village Corner](rust/examples/village/README.md) to review a directional
-character, two buildings from one recipe, terrain, stairs, and layered tree overlap.
-Every pixel was created by the CLI. The [original gallery](rust/examples/gallery/README.md)
-adds an animated keeper, a moss cottage, seeded creatures, and reusable components.
+The top row shows one chest with baseline, shadow, and highlight material ramps,
+plus a sentinel painted through a cloak mask. The bottom row shows the same cottage
+under three light directions and the sentinel before painting. All art and review
+images were produced by `painter`.
 
-## Quick start
+## See what it can make
 
-Install stable Rust (1.88 or newer), then run from the repository root:
+| Example | Review output | Editable inputs and capabilities |
+|---|---|---|
+| [Material and brush workshop](rust/examples/workshop/README.md) | [Chest variants](rust/examples/workshop/01-material-chest/export/preview.png), [masked painting](rust/examples/workshop/02-masked-sentinel/export/preview.png) | Explicit wood/steel ramps, reusable brush, protected silhouette, raw/solo layers, seven-view lighting sheets |
+| [Village Corner](rust/examples/village/README.md) | [Assembled scene](rust/examples/village/scene.png), [directional character](rust/examples/village/export/assets/0000/export/preview.png) | Parameterized buildings, terrain, stairs, anchors, split-layer overlap, and coherent asset families |
+| [Three-map lighting](rust/examples/lighting/README.md) | [Lighting comparison](rust/examples/lighting/overview.png), [animated neon](rust/examples/lighting/01-neon-sign/export/animation.png) | Pixel-aligned color/emissive/normal maps, geometry normals, animation, vector-aware transforms |
+| [Original gallery](rust/examples/gallery/README.md) | [Gallery overview](rust/examples/gallery/overview.png), [animated keeper](rust/examples/gallery/01-crystal-keeper/export/animation.png) | Layered characters, moss cottage, tiles, seeded creatures, reusable components |
+
+![A complete village assembled from generated assets](rust/examples/village/scene.png)
+
+## How to use it
+
+Extract a [native download](https://github.com/bstuddard/pixel-painter/releases/latest)
+into a writable folder and run `./painter --help` (Windows: `.\painter.exe --help`).
+The download includes its own README, examples, and guides; Rust is only needed
+when building the source. For source users, install Rust 1.88 or newer and run
+from this repository's root:
 
 ```sh
-cd rust
-cargo run --locked -- new --width 32 --height 32
-cargo run --locked -- draw rect --x 8 --y 8 --width 16 --height 16 --color '#5864A0' --fill
-cargo run --locked -- set-pixel --x 12 --y 12 --r 255 --g 220 --b 160
-cargo run --locked -- view
-cargo run --locked -- render --output preview.png --scale 8
-cargo run --locked -- export --output artwork.png
+cargo build --release --locked --manifest-path rust/Cargo.toml
+PAINTER=./rust/target/release/painter
 ```
 
-Commands share `canvas.json`. Use global `--file PATH` for another canvas and
-`--json` for structured results/errors. Coordinates start at `(0, 0)` at top left.
-Existing v0.1.1 canvas JSON and commands remain supported. Newly created artwork
-and exports refuse to overwrite files. Run edits sequentially.
+Create a small crystal, edit it, and export it. For a native download, set
+`PAINTER=./painter` first. These shell commands create `gem.json` in the current
+folder; use a fresh filename when repeating them.
+
+```sh
+"$PAINTER" --file gem.json new --width 32 --height 32
+"$PAINTER" --file gem.json draw polygon --points 16,3,28,14,16,29,4,14 --color '#253347' --fill
+"$PAINTER" --file gem.json draw polygon --points 16,5,25,14,16,25,7,14 --color '#51B7B0' --fill
+"$PAINTER" --file gem.json draw --alpha-lock line --x1 8 --y1 13 --x2 16 --y2 6 --color '#B7ECD4'
+"$PAINTER" --file gem.json render --output gem-preview.png --scale 8
+"$PAINTER" --file gem.json export --output gem.png
+"$PAINTER" --file gem.json preview --output gem-review --scale 4
+```
+
+Open `gem-preview.png` to inspect the enlarged artwork and `gem.png` for the
+native 32×32 engine asset. `gem-review/contact-sheet.png` compares color, maps,
+emission, and lighting; `review.json` contains map diagnostics. Coordinates start
+at `(0, 0)` in the top left. Edits save to the named JSON file; render/export/review
+leave it unchanged. New outputs refuse overwrites. Run edits sequentially.
+
+Review a complete animated example without editing it:
+
+```sh
+"$PAINTER" --file rust/examples/workshop/01-material-chest/project.painter.json preview --output chest-review --all-frames --scale 4
+"$PAINTER" --file rust/examples/workshop/01-material-chest/project.painter.json render --solo-layer normals --raw --output chest-normals.png --scale 4
+```
+
+In native downloads, example paths start with `examples/` instead of
+`rust/examples/`. Use `--json` for versioned structured results and errors.
+For repeated or AI-generated edits, put operations in a JSON batch and validate
+with `batch --input edits.ops.json --dry-run` before applying it.
+The [authoring and review guide](docs/authoring-and-review.md) walks through
+material ramps, masks, reusable brushes, isolated layers, and lighting diagnostics.
 
 ## Capabilities
 
 - Integer lines, rectangles, ellipses, polygons, flood fill, erase, and clear.
 - Versioned transactional JSON batches with dry-run, indexed errors, and work limits.
-- Named palettes, strict/nearest mapping, inspection, and nearest-neighbor previews.
+- Named palettes, explicit material ramps, strict/nearest mapping, and inspection.
+- Snapshot masks, alpha-locked brushes, isolated-layer previews, and lighting review bundles.
 - PNG import/export with exact eight-bit RGBA and explicit sixteen-bit reduction.
 - Snapshot region copy/paste, reusable components, flips, rotate, move, crop, resize.
 - Versioned projects with layers, visibility, opacity, explicit migration, checkpoints.
@@ -109,6 +149,8 @@ From the repository root, regenerate the entire gallery into a new folder:
 cargo build --release --locked --manifest-path rust/Cargo.toml
 python3 rust/examples/generate_gallery.py --painter rust/target/release/painter --output /tmp/painter-gallery
 python3 rust/examples/generate_village.py --painter rust/target/release/painter --output /tmp/painter-village
+python3 rust/examples/generate_lighting.py --painter rust/target/release/painter --output /tmp/painter-lighting
+python3 rust/examples/generate_workshop.py --painter rust/target/release/painter --output /tmp/painter-workshop
 ```
 
 The generator requires Python 3's standard library and invokes the actual CLI
@@ -127,7 +169,7 @@ cargo run --locked --manifest-path rust/Cargo.toml -- --file rust/examples/socce
 
 The [release workflow](.github/workflows/release.yml) builds native Linux x86_64,
 Windows x86_64, and both Mac architectures. Tag pushes and manual trial builds
-produce reviewable Actions artifacts. Public preview publication requires a manual
+produce reviewable Actions artifacts. Stable release publication requires a manual
 dispatch with `publish` explicitly enabled and an existing tag matching the Cargo
 version. Every release runs the shared checks against its exact source commit.
 

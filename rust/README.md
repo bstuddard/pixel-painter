@@ -6,6 +6,8 @@ See the [project README](https://github.com/bstuddard/pixel-painter),
 and [review gallery](examples/gallery/README.md).
 The [Village Corner example](examples/village/README.md) exercises coherent asset
 families, parameterized geometry, placement, and offline scene composition.
+The [v0.4 workshop](examples/workshop/README.md) demonstrates material ramps,
+masked brushes, isolated layers, and built-in lighting/diagnostic reviews.
 
 ```sh
 cargo run --locked -- --help
